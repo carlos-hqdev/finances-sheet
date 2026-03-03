@@ -26,7 +26,6 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { deleteAccount } from "@/features/accounts/actions/account-actions";
 import { AccountForm } from "./account-form";
-import { Prisma } from "@prisma/client";
 
 interface AccountActionsProps {
   account: {
@@ -35,7 +34,7 @@ interface AccountActionsProps {
     name: string;
     type: "CHECKING" | "INVESTMENT" | "CASH" | string;
     institution: string | null;
-    balance: Prisma.Decimal | any;
+    balance: number;
     color: string | null;
     createdAt: Date;
     updatedAt: Date;

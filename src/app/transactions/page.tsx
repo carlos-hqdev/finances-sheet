@@ -4,6 +4,7 @@ import { TransactionDialog } from "@/features/transactions/components/transactio
 import { prisma } from "@/shared/lib/db";
 import { DashboardLayout } from "@/shared/widgets/dashboard-overview/dashboard-layout";
 import { TransactionActions } from "@/features/transactions/components/transaction-actions";
+import { TransactionIsPaidSwitch } from "@/features/transactions/components/transaction-is-paid-switch";
 
 export default async function TransactionsPage() {
   const transactionsRaw = await prisma.transaction.findMany({
@@ -72,6 +73,7 @@ export default async function TransactionsPage() {
               <th className="px-6 py-3">Conta</th>
               <th className="px-6 py-3">Método</th>
               <th className="px-6 py-3 text-right">Valor</th>
+              <th className="px-6 py-3 text-center">Pago</th>
               <th className="px-6 py-3 text-center w-[50px]">
                 <span className="sr-only">Ações</span>
               </th>
@@ -81,7 +83,7 @@ export default async function TransactionsPage() {
             {transactions.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-6 py-8 text-center text-muted-foreground"
                 >
                   Nenhuma transação encontrada.
@@ -124,6 +126,13 @@ export default async function TransactionsPage() {
                       style: "currency",
                       currency: "BRL",
                     }).format(Number(tx.amount))}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <TransactionIsPaidSwitch
+                      transactionId={tx.id}
+                      isPaid={tx.isPaid}
+                      type={tx.type}
+                    />
                   </td>
                   <td className="px-6 py-4 text-center">
                     <TransactionActions

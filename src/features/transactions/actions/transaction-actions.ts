@@ -22,62 +22,16 @@ export async function createTransaction(data: {
     data.condition === "PARCELADO" ? "PARCELADO" : "A_VISTA"
   ) as "A_VISTA" | "PARCELADO";
 
-  // Calculate dynamic reference month (using day 25 as salary base, could be customized)
+  // Calculate dynamic reference month (using day 25 as salary base)
   const referenceMonth = getFinanceReferenceMonth(data.date, 25);
   const isPaid = data.isPaid ?? false;
 
-  if (data.type === "TRANSFER" && data.destinationAccountId) {
-    await prisma.$transaction([
-      prisma.transaction.create({
-        data: {
-          description: data.description,
-          amount: data.amount,
-          type: "EXPENSE",
-          categoryId: data.categoryId,
-          accountId: data.accountId,
-          destinationAccountId: data.destinationAccountId,
-          paymentMethod: "TRANSFER",
-          date: data.date,
-          condition,
-          notes: data.notes,
-        },
-      }),
-      prisma.transaction.create({
-        data: {
-          description: data.description,
-          amount: data.amount,
-          type: "INCOME",
-          categoryId: data.categoryId,
-          accountId: data.destinationAccountId,
-          // Store the source account as "destination" reference for the receiving transaction
-          destinationAccountId: data.accountId,
-          paymentMethod: "TRANSFER",
-          date: data.date,
-          condition,
-          notes: data.notes,
-          referenceMonth,
-          isPaid,
-        },
-      }),
-    ]);
-
-    // Update balances if a transfer is paid
-    if (isPaid) {
-      await prisma.account.update({
-        where: { id: data.accountId },
-        data: { balance: { decrement: data.amount } },
-      });
-      await prisma.account.update({
-        where: { id: data.destinationAccountId },
-        data: { balance: { increment: data.amount } },
-      });
-    }
-  } else {
+  await prisma.$transaction(async (tx) => {
     let invoiceId: string | undefined;
 
-    // Process Credit Card Invoice logic
-    if (data.paymentMethod === "CREDIT_CARD" && data.creditCardId) {
-      const card = await prisma.creditCard.findUnique({
+    // Process Credit Card Invoice logic (for non-transfers)
+    if (data.type !== "TRANSFER" && data.paymentMethod === "CREDIT_CARD" && data.creditCardId) {
+      const card = await tx.creditCard.findUnique({
         where: { id: data.creditCardId },
       });
       if (card) {
@@ -94,7 +48,7 @@ export async function createTransaction(data: {
           }
         }
 
-        const invoice = await prisma.invoice.upsert({
+        const invoice = await tx.invoice.upsert({
           where: {
             creditCardId_month_year: {
               creditCardId: data.creditCardId,
@@ -117,16 +71,16 @@ export async function createTransaction(data: {
       }
     }
 
-    await prisma.transaction.create({
+    await tx.transaction.create({
       data: {
         description: data.description,
         amount: data.amount,
         type: data.type,
         categoryId: data.categoryId,
         accountId: data.accountId,
-        destinationAccountId: data.destinationAccountId,
-        paymentMethod: data.paymentMethod,
-        creditCardId: data.creditCardId,
+        destinationAccountId: data.type === "TRANSFER" ? data.destinationAccountId : null,
+        paymentMethod: data.type === "TRANSFER" ? "TRANSFER" : data.paymentMethod,
+        creditCardId: data.type === "TRANSFER" ? null : data.creditCardId,
         date: data.date,
         condition,
         notes: data.notes,
@@ -136,19 +90,36 @@ export async function createTransaction(data: {
       },
     });
 
-    // Substract or add to account balance
-    if (data.paymentMethod !== "CREDIT_CARD" && isPaid) {
-      const incrementDecrement =
-        data.type === "INCOME" ? "increment" : "decrement";
-      await prisma.account.update({
-        where: { id: data.accountId },
-        data: {
-          balance: { [incrementDecrement]: data.amount },
-        },
-      });
+    // Calculate balance changes
+    if (isPaid) {
+      if (data.type === "TRANSFER" && data.destinationAccountId) {
+        await tx.account.update({
+          where: { id: data.accountId },
+          data: { balance: { decrement: data.amount } },
+        });
+        await tx.account.update({
+          where: { id: data.destinationAccountId },
+          data: { balance: { increment: data.amount } },
+        });
+      } else if (data.paymentMethod !== "CREDIT_CARD") {
+        if (data.type === "INCOME") {
+          await tx.account.update({
+            where: { id: data.accountId },
+            data: { balance: { increment: data.amount } },
+          });
+        } else if (data.type === "EXPENSE") {
+          await tx.account.update({
+            where: { id: data.accountId },
+            data: { balance: { decrement: data.amount } },
+          });
+        }
+      }
     }
-  }
+  });
+
   revalidatePath("/transactions");
+  revalidatePath("/accounts");
+  revalidatePath("/");
 }
 
 export async function updateTransaction(
@@ -169,8 +140,6 @@ export async function updateTransaction(
     referenceMonth?: string;
   }
 ) {
-  // To properly update, we should revert the old transaction's impact on balances/invoices,
-  // then apply the new one.
   const oldTx = await prisma.transaction.findUnique({
     where: { id },
   });
@@ -178,26 +147,18 @@ export async function updateTransaction(
   if (!oldTx) return { error: "Transaction not found" };
 
   try {
-    // 1. Revert old transaction impacts
-    if (oldTx.type === "TRANSFER" && oldTx.destinationAccountId && oldTx.isPaid) {
-      await prisma.account.update({
-        where: { id: oldTx.accountId },
-        data: { balance: { increment: oldTx.amount } }, // Revert decrement
-      });
-      await prisma.account.update({
-        where: { id: oldTx.destinationAccountId },
-        data: { balance: { decrement: oldTx.amount } }, // Revert increment
-      });
-    } else if (oldTx.type !== "TRANSFER") {
-      if (oldTx.paymentMethod === "CREDIT_CARD" && oldTx.invoiceId) {
-        // Decrement from old invoice
-        await prisma.invoice.update({
-          where: { id: oldTx.invoiceId },
-          data: { totalAmount: { decrement: oldTx.amount } },
+    // 1. Revert old transaction impacts on balances/invoices
+    if (oldTx.isPaid) {
+      if (oldTx.type === "TRANSFER" && oldTx.destinationAccountId) {
+        await prisma.account.update({
+          where: { id: oldTx.accountId },
+          data: { balance: { increment: oldTx.amount } }, // Revert decrement
         });
-      }
-
-      if (oldTx.paymentMethod !== "CREDIT_CARD" && oldTx.isPaid) {
+        await prisma.account.update({
+          where: { id: oldTx.destinationAccountId },
+          data: { balance: { decrement: oldTx.amount } }, // Revert increment
+        });
+      } else if (oldTx.paymentMethod !== "CREDIT_CARD") {
         const revertOp = oldTx.type === "INCOME" ? "decrement" : "increment";
         await prisma.account.update({
           where: { id: oldTx.accountId },
@@ -206,35 +167,83 @@ export async function updateTransaction(
       }
     }
 
+    if (oldTx.type !== "TRANSFER" && oldTx.paymentMethod === "CREDIT_CARD" && oldTx.invoiceId) {
+      // Revert from old invoice
+      await prisma.invoice.update({
+        where: { id: oldTx.invoiceId },
+        data: { totalAmount: { decrement: oldTx.amount } },
+      });
+    }
+
     // 2. Calculate new properties
     const condition = (data.condition === "PARCELADO" ? "PARCELADO" : "A_VISTA") as "A_VISTA" | "PARCELADO";
     const referenceMonth = data.referenceMonth || getFinanceReferenceMonth(data.date, 25);
     const isPaid = data.isPaid ?? false;
 
-    // 3. Apply new transaction and update record
-    if (data.type === "TRANSFER" && data.destinationAccountId) {
-      // NOTE: This assumes transfers are a single record now or we just update the sender record
-      // The original create handled transfers as two separate records? Wait, `transaction.create` inside `$transaction` creates TWO records.
-      // If the old was a transfer, we'd need to find the pair. For simplicity, we just update the current record and balances.
-      await prisma.transaction.update({
-        where: { id },
-        data: {
-          description: data.description,
-          amount: data.amount,
-          type: "EXPENSE", // Assuming the edited one is the sender side, or just keep original type
-          categoryId: data.categoryId,
-          accountId: data.accountId,
-          destinationAccountId: data.destinationAccountId,
-          paymentMethod: "TRANSFER",
-          date: data.date,
-          condition,
-          notes: data.notes,
-          isPaid,
-          referenceMonth,
-        },
-      });
+    // 3. Apply logic for new invoice if needed
+    let invoiceId: string | undefined = undefined;
 
-      if (isPaid) {
+    if (data.type !== "TRANSFER" && data.paymentMethod === "CREDIT_CARD" && data.creditCardId) {
+      const card = await prisma.creditCard.findUnique({
+        where: { id: data.creditCardId },
+      });
+      if (card) {
+        const transDate = new Date(data.date);
+        let invMonth = transDate.getMonth() + 1;
+        let invYear = transDate.getFullYear();
+
+        if (transDate.getDate() >= card.closingDay) {
+          invMonth += 1;
+          if (invMonth > 12) {
+            invMonth = 1;
+            invYear += 1;
+          }
+        }
+
+        const invoice = await prisma.invoice.upsert({
+          where: {
+            creditCardId_month_year: {
+              creditCardId: data.creditCardId,
+              month: invMonth,
+              year: invYear,
+            },
+          },
+          update: { totalAmount: { increment: data.amount } },
+          create: {
+            creditCardId: data.creditCardId,
+            month: invMonth,
+            year: invYear,
+            totalAmount: data.amount,
+          },
+        });
+        invoiceId = invoice.id;
+      }
+    }
+
+    // 4. Update transaction
+    await prisma.transaction.update({
+      where: { id },
+      data: {
+        description: data.description,
+        amount: data.amount,
+        type: data.type,
+        categoryId: data.categoryId,
+        accountId: data.accountId,
+        destinationAccountId: data.type === "TRANSFER" ? data.destinationAccountId : null,
+        paymentMethod: data.type === "TRANSFER" ? "TRANSFER" : data.paymentMethod,
+        creditCardId: data.type === "TRANSFER" ? null : data.creditCardId,
+        date: data.date,
+        condition,
+        notes: data.notes,
+        referenceMonth,
+        invoiceId,
+        isPaid,
+      },
+    });
+
+    // 5. Apply new tracking to balances
+    if (isPaid) {
+      if (data.type === "TRANSFER" && data.destinationAccountId) {
         await prisma.account.update({
           where: { id: data.accountId },
           data: { balance: { decrement: data.amount } },
@@ -243,68 +252,7 @@ export async function updateTransaction(
           where: { id: data.destinationAccountId },
           data: { balance: { increment: data.amount } },
         });
-      }
-    } else {
-      let invoiceId: string | undefined = undefined;
-
-      if (data.paymentMethod === "CREDIT_CARD" && data.creditCardId) {
-        const card = await prisma.creditCard.findUnique({
-          where: { id: data.creditCardId },
-        });
-        if (card) {
-          const transDate = new Date(data.date);
-          let invMonth = transDate.getMonth() + 1;
-          let invYear = transDate.getFullYear();
-
-          if (transDate.getDate() >= card.closingDay) {
-            invMonth += 1;
-            if (invMonth > 12) {
-              invMonth = 1;
-              invYear += 1;
-            }
-          }
-
-          const invoice = await prisma.invoice.upsert({
-            where: {
-              creditCardId_month_year: {
-                creditCardId: data.creditCardId,
-                month: invMonth,
-                year: invYear,
-              },
-            },
-            update: { totalAmount: { increment: data.amount } },
-            create: {
-              creditCardId: data.creditCardId,
-              month: invMonth,
-              year: invYear,
-              totalAmount: data.amount,
-            },
-          });
-          invoiceId = invoice.id;
-        }
-      }
-
-      await prisma.transaction.update({
-        where: { id },
-        data: {
-          description: data.description,
-          amount: data.amount,
-          type: data.type,
-          categoryId: data.categoryId,
-          accountId: data.accountId,
-          destinationAccountId: data.destinationAccountId,
-          paymentMethod: data.paymentMethod,
-          creditCardId: data.creditCardId,
-          date: data.date,
-          condition,
-          notes: data.notes,
-          referenceMonth,
-          invoiceId,
-          isPaid,
-        },
-      });
-
-      if (data.paymentMethod !== "CREDIT_CARD" && isPaid) {
+      } else if (data.paymentMethod !== "CREDIT_CARD") {
         const applyOp = data.type === "INCOME" ? "increment" : "decrement";
         await prisma.account.update({
           where: { id: data.accountId },
@@ -314,6 +262,8 @@ export async function updateTransaction(
     }
 
     revalidatePath("/transactions");
+    revalidatePath("/accounts");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to update transaction:", error);
@@ -326,41 +276,18 @@ export async function deleteTransaction(id: string) {
     const oldTx = await prisma.transaction.findUnique({ where: { id } });
     if (!oldTx) return { error: "Transaction not found" };
 
-    // Revert impacts
-    if (oldTx.type === "TRANSFER" && oldTx.destinationAccountId && oldTx.isPaid) {
-      await prisma.account.update({
-        where: { id: oldTx.accountId },
-        data: { balance: { increment: oldTx.amount } },
-      });
-      await prisma.account.update({
-        where: { id: oldTx.destinationAccountId },
-        data: { balance: { decrement: oldTx.amount } },
-      });
-      // Try to find the other side of the transfer and delete it too
-      // Usually they share the same date, amount, description and opposite accounts.
-      const transferPair = await prisma.transaction.findFirst({
-        where: {
-          type: "INCOME",
-          paymentMethod: "TRANSFER",
-          accountId: oldTx.destinationAccountId,
-          destinationAccountId: oldTx.accountId,
-          amount: oldTx.amount,
-          date: oldTx.date,
-        },
-      });
-      if (transferPair) {
-        await prisma.transaction.delete({ where: { id: transferPair.id } });
-      }
-
-    } else if (oldTx.type !== "TRANSFER") {
-      if (oldTx.paymentMethod === "CREDIT_CARD" && oldTx.invoiceId) {
-        await prisma.invoice.update({
-          where: { id: oldTx.invoiceId },
-          data: { totalAmount: { decrement: oldTx.amount } },
+    // Revert impacts on accounts
+    if (oldTx.isPaid) {
+      if (oldTx.type === "TRANSFER" && oldTx.destinationAccountId) {
+        await prisma.account.update({
+          where: { id: oldTx.accountId },
+          data: { balance: { increment: oldTx.amount } }, // Revert decrement
         });
-      }
-
-      if (oldTx.paymentMethod !== "CREDIT_CARD" && oldTx.isPaid) {
+        await prisma.account.update({
+          where: { id: oldTx.destinationAccountId },
+          data: { balance: { decrement: oldTx.amount } }, // Revert increment
+        });
+      } else if (oldTx.paymentMethod !== "CREDIT_CARD") {
         const revertOp = oldTx.type === "INCOME" ? "decrement" : "increment";
         await prisma.account.update({
           where: { id: oldTx.accountId },
@@ -369,12 +296,85 @@ export async function deleteTransaction(id: string) {
       }
     }
 
+    // Revert impacts on invoices
+    if (oldTx.type !== "TRANSFER" && oldTx.paymentMethod === "CREDIT_CARD" && oldTx.invoiceId) {
+      await prisma.invoice.update({
+        where: { id: oldTx.invoiceId },
+        data: { totalAmount: { decrement: oldTx.amount } },
+      });
+    }
+
     await prisma.transaction.delete({ where: { id } });
 
     revalidatePath("/transactions");
+    revalidatePath("/accounts");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete transaction:", error);
     return { error: "Failed to delete transaction" };
+  }
+}
+
+export async function toggleTransactionIsPaid(id: string, isPaid: boolean) {
+  const oldTx = await prisma.transaction.findUnique({ where: { id } });
+  if (!oldTx) return { error: "Transaction not found" };
+
+  if (oldTx.isPaid === isPaid) return { success: true };
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Se estava paga e agora NÃO está (devemos REVERTER o saldo)
+      if (oldTx.isPaid && !isPaid) {
+        if (oldTx.type === "TRANSFER" && oldTx.destinationAccountId) {
+          await tx.account.update({
+            where: { id: oldTx.accountId },
+            data: { balance: { increment: oldTx.amount } }, // Revert decrement
+          });
+          await tx.account.update({
+            where: { id: oldTx.destinationAccountId },
+            data: { balance: { decrement: oldTx.amount } }, // Revert increment
+          });
+        } else if (oldTx.paymentMethod !== "CREDIT_CARD") {
+          const revertOp = oldTx.type === "INCOME" ? "decrement" : "increment";
+          await tx.account.update({
+            where: { id: oldTx.accountId },
+            data: { balance: { [revertOp]: oldTx.amount } },
+          });
+        }
+      }
+      // Se NÃO estava paga e agora ESTÁ (devemos APLICAR o saldo)
+      else if (!oldTx.isPaid && isPaid) {
+        if (oldTx.type === "TRANSFER" && oldTx.destinationAccountId) {
+          await tx.account.update({
+            where: { id: oldTx.accountId },
+            data: { balance: { decrement: oldTx.amount } },
+          });
+          await tx.account.update({
+            where: { id: oldTx.destinationAccountId },
+            data: { balance: { increment: oldTx.amount } },
+          });
+        } else if (oldTx.paymentMethod !== "CREDIT_CARD") {
+          const applyOp = oldTx.type === "INCOME" ? "increment" : "decrement";
+          await tx.account.update({
+            where: { id: oldTx.accountId },
+            data: { balance: { [applyOp]: oldTx.amount } },
+          });
+        }
+      }
+
+      await tx.transaction.update({
+        where: { id },
+        data: { isPaid },
+      });
+    });
+
+    revalidatePath("/transactions");
+    revalidatePath("/accounts");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to toggle transaction isPaid:", error);
+    return { error: "Failed to update transaction status" };
   }
 }

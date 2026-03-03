@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
+import { Switch } from "@/shared/components/ui/switch";
+import { cn } from "@/shared/lib/utils";
 // Alterado de Sheet para Dialog
 import {
   Dialog,
@@ -55,8 +57,12 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
       balance: initialData ? Number(initialData.balance) : 0,
       color: initialData?.color || "#000000",
       institution: initialData?.institution || "",
+      yieldRate: initialData?.yieldRate ? Number(initialData.yieldRate) : undefined,
+      isDailyYield: initialData?.isDailyYield ?? false,
     },
   });
+
+  const accountType = form.watch("type");
 
   function onSubmit(data: AccountFormValues) {
     startTransition(async () => {
@@ -89,9 +95,11 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
       {/* sm:max-w-[425px] define uma largura agradável para diálogos */}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Nova Conta</DialogTitle>
+          <DialogTitle>{isEditing ? "Editar Conta" : "Nova Conta"}</DialogTitle>
           <DialogDescription>
-            Crie uma nova conta para gerenciar seus gastos.
+            {isEditing
+              ? "Atualize as informações da sua conta financeira."
+              : "Crie uma nova conta para gerenciar seus gastos."}
           </DialogDescription>
         </DialogHeader>
 
@@ -128,8 +136,8 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="CHECKING">Conta Corrente</SelectItem>
-                      <SelectItem value="INVESTMENT">Investimento</SelectItem>
-                      <SelectItem value="CASH">Dinheiro</SelectItem>
+                      <SelectItem value="INVESTMENT">Investimento / Caixinha</SelectItem>
+                      <SelectItem value="CASH">Dinheiro Vivo</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -166,6 +174,49 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
                 </FormItem>
               )}
             />
+
+            {accountType === "INVESTMENT" && (
+              <div className="grid grid-cols-2 gap-4 border border-zinc-800 p-4 rounded-xl bg-zinc-900/30">
+                <FormField
+                  control={form.control}
+                  name="yieldRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs">Rendimento (% a.a.)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Ex: 100"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="isDailyYield"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between shrink-0 space-y-0 h-full mt-2">
+                      <FormLabel className="text-xs">Rendimento<br />Diário?</FormLabel>
+                      <FormControl className="h-full mt-0">
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className={cn(field.value && "!bg-emerald-500")}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? "Salvando..." : isEditing ? "Salvar Alterações" : "Criar Conta"}

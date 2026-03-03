@@ -63,7 +63,13 @@ export async function AccountList() {
                     variant="outline"
                     className="bg-muted text-muted-foreground border-border"
                   >
-                    {account.type}
+                    {
+                      {
+                        CHECKING: "Conta Corrente",
+                        INVESTMENT: "Investimento / Caixinha",
+                        CASH: "Dinheiro Vivo",
+                      }[account.type] || account.type
+                    }
                   </Badge>
                 </TableCell>
                 <TableCell className="px-6 py-4 text-right font-semibold text-foreground">

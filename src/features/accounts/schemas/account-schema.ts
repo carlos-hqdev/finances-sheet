@@ -6,11 +6,13 @@ export const accountSchema = z.object({
     message: "Type is required",
   }),
   institution: z.string().optional(),
-  balance: z.coerce.number().default(0),
+  balance: z.number().default(0),
   color: z
     .string()
     .regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color hex")
     .optional(),
+  yieldRate: z.number().optional().nullable(),
+  isDailyYield: z.boolean().default(false).optional(),
 });
 
 export type AccountFormValues = z.infer<typeof accountSchema>;

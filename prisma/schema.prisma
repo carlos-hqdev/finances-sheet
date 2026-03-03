@@ -27,6 +27,9 @@ model Account {
   institution String?
   balance     Decimal  @default(0)
   color       String?  // Hex code
+  yieldRate   Decimal? // For "Caixinhas" / Savings
+  isDailyYield Boolean @default(false)
+  lastYieldDate DateTime?
   
   user        User     @relation(fields: [userId], references: [id])
   transactions Transaction[] @relation("AccountTransactions")

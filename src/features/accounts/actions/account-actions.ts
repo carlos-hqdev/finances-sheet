@@ -44,6 +44,7 @@ export async function createAccount(data: AccountFormValues) {
     });
 
     revalidatePath("/accounts");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to create account:", error);
@@ -63,7 +64,8 @@ export async function getAccounts() {
   
   return accounts.map(a => ({
     ...a,
-    balance: a.balance.toNumber()
+    balance: a.balance.toNumber(),
+    yieldRate: a.yieldRate ? a.yieldRate.toNumber() : undefined,
   }));
 }
 
@@ -81,6 +83,7 @@ export async function updateAccount(id: string, data: AccountFormValues) {
     });
 
     revalidatePath("/accounts");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to update account:", error);
@@ -97,6 +100,7 @@ export async function deleteAccount(id: string) {
     });
 
     revalidatePath("/accounts");
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete account:", error);

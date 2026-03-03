@@ -49,6 +49,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/lib/utils";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
+import { Switch } from "@/shared/components/ui/switch";
 
 // Schema centralizado
 const formSchema = z.object({
@@ -65,6 +66,7 @@ const formSchema = z.object({
   condition: z.enum(["A_VISTA", "PARCELADO"]),
   installments: z.coerce.number().min(1).optional(),
   notes: z.string().optional(),
+  isPaid: z.boolean().default(true),
 });
 
 // Inferência do Tipo para evitar erros de TS
@@ -107,6 +109,7 @@ export function TransactionDialog({
       destinationAccountId: initialData?.destinationAccountId || undefined,
       creditCardId: initialData?.creditCardId || undefined,
       notes: initialData?.notes || "",
+      isPaid: initialData?.isPaid ?? true,
     },
   });
 
@@ -188,6 +191,7 @@ export function TransactionDialog({
           date: values.date,
           condition: values.condition as "A_VISTA" | "PARCELADO",
           notes: values.notes,
+          isPaid: values.isPaid,
         };
 
         let result;
@@ -213,6 +217,7 @@ export function TransactionDialog({
             accountId: undefined,
             destinationAccountId: undefined,
             creditCardId: undefined,
+            isPaid: true,
           });
         }
       } catch (error) {
@@ -616,6 +621,32 @@ export function TransactionDialog({
                   </>
                 )}
               </div>
+
+              <FormField
+                control={form.control}
+                name="isPaid"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between p-4 bg-zinc-900/30 rounded-xl border border-white/5">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-xs font-bold text-zinc-300">
+                        {type === "TRANSFER" ? "Efetivada" : "Transação Paga"}
+                      </FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className={cn(
+                          field.value && (
+                            type === "EXPENSE" ? "!bg-red-500" :
+                              type === "INCOME" ? "!bg-emerald-500" : "!bg-blue-500"
+                          )
+                        )}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
               <button
                 type="button"
