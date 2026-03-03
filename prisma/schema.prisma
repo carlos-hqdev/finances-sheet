@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  accounts  Account[]
+  categories Category[]
+  budgets   Budget[]
+  investments Investment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  type        String   // CHECKING, INVESTMENT, CASH (Enums not fully supported in SQLite in same way, using String)
+  institution String?
+  balance     Decimal  @default(0)
+  color       String?  // Hex code
+  
+  user        User     @relation(fields: [userId], references: [id])
+  transactions Transaction[] @relation("AccountTransactions")
+  incomingTransfers Transaction[] @relation("TransferDestination")
+  creditCards CreditCard[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CreditCard {
+  id          String   @id @default(cuid())
+  accountId   String
+  limit       Decimal
+  closingDay  Int      // 1-31
+  dueDay      Int      // 1-31
+  
+  account     Account  @relation(fields: [accountId], references: [id])
+  transactions Transaction[]
+  invoices    Invoice[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String?
+  icon      String?  // Lucide icon name
+  
+  user      User     @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  budgets   Budget[]
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  accountId   String
+  categoryId  String?
+  creditCardId String?
+  
+  amount      Decimal
+  type        String   // INCOME, EXPENSE, TRANSFER
+  paymentMethod String? // CREDIT_CARD, DEBIT_CARD, PIX, BOLETO, CASH, TRANSFER, OTHER
+  date        DateTime
+  description String
+  isPaid      Boolean  @default(false)
+  
+  // Installments / Recurrence Logic
+  isRecurring Boolean @default(false)
+  recurringId String?
+  installmentCurrent Int?
+  installmentTotal   Int?
+
+  account     Account  @relation(fields: [accountId], references: [id], name: "AccountTransactions")
+  category    Category? @relation(fields: [categoryId], references: [id])
+  creditCard  CreditCard? @relation(fields: [creditCardId], references: [id])
+  
+  referenceMonth String? // Format: "YYYY-MM"
+  invoiceId   String?
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
+
+  destinationAccountId String?
+  destinationAccount   Account? @relation("TransferDestination", fields: [destinationAccountId], references: [id])
+
+  condition   TransactionCondition @default(A_VISTA)
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum TransactionCondition {
+  A_VISTA
+  PARCELADO
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  userId      String
+  categoryId  String
+  amount      Decimal
+  month       Int
+  year        Int
+  
+  user        User     @relation(fields: [userId], references: [id])
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, categoryId, month, year])
+}
+
+model Invoice {
+  id           String   @id @default(cuid())
+  creditCardId String
+  month        Int
+  year         Int
+  totalAmount  Decimal  @default(0)
+  isPaid       Boolean  @default(false)
+  dueDate      DateTime?
+  
+  creditCard   CreditCard @relation(fields: [creditCardId], references: [id])
+  transactions Transaction[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([creditCardId, month, year])
+}
+
+model Investment {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  type        String   // VARIABLE, FIXED, CRYPTO, ETC
+  category    String?
+  amount      Decimal? // Quantity held
+  balance     Decimal  @default(0) // Current monetary value (manual update)
+  yieldRate   Decimal?
+  yieldFrequency String? // e.g. "MONTHLY", "DAILY"
+  institution String?
+  
+  user        User     @relation(fields: [userId], references: [id])
+  history     InvestmentHistory[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model InvestmentHistory {
+  id           String     @id @default(cuid())
+  investmentId String
+  balance      Decimal
+  date         DateTime   @default(now())
+  
+  investment   Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime   @default(now())
+}

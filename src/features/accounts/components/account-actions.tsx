@@ -1,0 +1,138 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
+
+import { Button } from "@/shared/components/ui/button";
+import { deleteAccount } from "@/features/accounts/actions/account-actions";
+import { AccountForm } from "./account-form";
+import { Prisma } from "@prisma/client";
+
+interface AccountActionsProps {
+  account: {
+    id: string;
+    userId: string;
+    name: string;
+    type: "CHECKING" | "INVESTMENT" | "CASH" | string;
+    institution: string | null;
+    balance: Prisma.Decimal | any;
+    color: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
+export function AccountActions({ account }: AccountActionsProps) {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  function onCopyId() {
+    navigator.clipboard.writeText(account.id);
+  }
+
+  function onDelete() {
+    startTransition(async () => {
+      const result = await deleteAccount(account.id);
+      if (result.success) {
+        setIsDeleteOpen(false);
+      } else {
+        console.error(result.error);
+        alert(result.error);
+      }
+    });
+  }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Abrir menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+          {process.env.NODE_ENV === "development" && (
+            <>
+              <DropdownMenuItem onClick={onCopyId}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copiar ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+
+          <AccountForm
+            initialData={{
+              ...account,
+              type: account.type as any,
+              color: account.color || "#000000",
+              balance: Number(account.balance),
+              institution: account.institution || "",
+            }}
+            trigger={
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <Edit2 className="mr-2 h-4 w-4" />
+                Editar
+              </DropdownMenuItem>
+            }
+          />
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-red-600 focus:text-red-700 focus:bg-red-100"
+            onClick={() => setIsDeleteOpen(true)}
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Excluir
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente a
+              conta <strong>{account.name}</strong> e todos os dados associados a ela (pode gerar erro se houver transações e não houver cascade).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                e.preventDefault();
+                onDelete();
+              }}
+              disabled={isPending}
+            >
+              {isPending ? "Excluindo..." : "Sim, Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
