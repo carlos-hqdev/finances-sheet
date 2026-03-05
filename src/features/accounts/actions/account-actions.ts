@@ -64,8 +64,7 @@ export async function getAccounts() {
   
   return accounts.map(a => ({
     ...a,
-    balance: a.balance.toNumber(),
-    yieldRate: a.yieldRate ? a.yieldRate.toNumber() : undefined,
+    balance: a.balance ? a.balance.toNumber() : 0,
   }));
 }
 

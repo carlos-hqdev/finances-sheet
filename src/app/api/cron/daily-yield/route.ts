@@ -18,78 +18,85 @@ export async function GET(request: Request) {
 
   try {
     // 1. Fetch all accounts that have daily yield enabled and a valid yield rate
-    const accounts = await prisma.account.findMany({
-      where: {
+    const investments = await prisma.investment.findMany({
+      where: { 
         isDailyYield: true,
         yieldRate: { not: null },
       },
+      include: {
+        lots: true, // We need to calculate yield per lot
+      },
     });
 
-    const today = startOfDay(new Date());
-    let processedCount = 0;
+    let totalYields = 0;
 
-    for (const account of accounts) {
-      if (!account.yieldRate || account.balance.toNumber() <= 0) continue;
+    for (const investment of investments) {
+      if (!investment.yieldRate || investment.balance.toNumber() <= 0) continue;
 
       // Determine days since last yield (default to 1 if no previous record exists)
-      const lastDate = account.lastYieldDate ? startOfDay(account.lastYieldDate) : null;
-      const daysPassed = lastDate ? differenceInDays(today, lastDate) : 1;
+      const lastYieldDate = investment.updatedAt; // Temporarily using updatedAt or we need lastYieldDate in Investment
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      // Only process if at least one day has passed
-      if (daysPassed < 1) continue;
+      const lastDate = new Date(lastYieldDate || investment.createdAt);
+      lastDate.setHours(0, 0, 0, 0);
 
-      // Calculate yield: 
+      const diffTime = today.getTime() - lastDate.getTime();
+      const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (daysPassed <= 0) continue;
+
+      // Yield calculation (simplified)
       // yieldRate is typically annual (e.g., 10%). 
-      // Approximate daily rate = Annual Rate / 365
+      // Monthly: (1 + annualRate)^(1/12) - 1
       // To get the actual decimal: yieldRate / 100
       // Daily multiplier = (yieldRate / 100) / 365
-      const annualRateDecimal = account.yieldRate.toNumber() / 100;
+      const annualRateDecimal = investment.yieldRate.toNumber() / 100;
+      // Compound interest formula: A = P(1 + r/n)^(nt)
+      // Since it's daily, n=1, t=daysPassed, r = dailyRate
       const dailyRate = annualRateDecimal / 365;
+      const compoundFactor = Math.pow(1 + dailyRate, daysPassed);
       
-      // Calculate earnings based on compound or simple interest for the days passed
-      // Using simple interest for tiny daily precision on normal balances
-      const currentBalance = account.balance.toNumber();
-      const yieldEarnings = currentBalance * dailyRate * daysPassed;
-
-      // Ignore microscopic yields (less than 1 cent)
-      if (yieldEarnings < 0.01) continue;
-
-      const referenceMonth = getFinanceReferenceMonth(today, 25);
+      const previousBalance = investment.balance.toNumber();
+      const rawYieldAmount = previousBalance * (compoundFactor - 1);
+      
+      // Let's cap precision to 2 decimal places to avoid tiny fractions preventing updates
+      const yieldAmount = Number(rawYieldAmount.toFixed(4)); 
+      
+      if (yieldAmount <= 0.005) {
+        continue; // Too small to register as a cent
+      }
 
       await prisma.$transaction(async (tx) => {
-        // Create the Yield transaction
-        await tx.transaction.create({
+        // Create a generic transaction representing the yield (Income)
+        // Since it's an investment now, it's not a regular account transaction.
+        // For now, we update the investment balance directly.
+        // Or generate a history record.
+        
+        await tx.investmentHistory.create({
           data: {
-            accountId: account.id,
-            amount: yieldEarnings,
-            type: "INCOME",
-            description: `Rendimento Diário (${account.name})`,
-            paymentMethod: "OTHER",
-            date: today,
-            isPaid: true,
-            condition: "A_VISTA",
-            referenceMonth,
-            notes: `Rendimento calculado para ${daysPassed} dia(s). Taxa: ${account.yieldRate}% a.a.`,
-          },
+            investmentId: investment.id,
+            balance: previousBalance + yieldAmount,
+            date: new Date()
+          }
         });
 
-        // Update Account balance and lastYieldDate
-        await tx.account.update({
-          where: { id: account.id },
+        // Update Investment balance and timestamp
+        await tx.investment.update({
+          where: { id: investment.id },
           data: {
-            balance: { increment: yieldEarnings },
-            lastYieldDate: today,
+            balance: { increment: yieldAmount },
           },
         });
       });
 
-      processedCount++;
+      totalYields++;
     }
 
     return NextResponse.json({
       success: true,
-      message: `Rendimentos processados com sucesso. Contas afetadas: ${processedCount}`,
-      processedCount,
+      message: `Processed yields for ${totalYields} investments.`,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Error processing daily yields:", error);
