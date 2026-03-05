@@ -4,9 +4,11 @@ import { prisma } from "@/shared/lib/db";
 export async function processMonthlyYields() {
   const investments = await prisma.investment.findMany({
     where: {
-      yieldRate: { gt: 0 },
-      yieldFrequency: "MONTHLY",
+      isDailyYield: true,
     },
+    include: {
+      lots: true,
+    }
   });
 
   for (const inv of investments) {

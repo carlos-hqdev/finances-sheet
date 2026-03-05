@@ -33,15 +33,19 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
+import { Switch } from "@/shared/components/ui/switch";
+import { cn } from "@/shared/lib/utils";
 import { Database } from "lucide-react"; // Or another appropriate icon
 
 const formSchema = z.object({
   name: z.string().min(2, "Obrigatório"),
-  type: z.string().min(2, "Obrigatório"),
+  type: z.enum(["FIXED", "VARIABLE", "CRYPTO"]),
   institution: z.string().optional(),
   balance: z.coerce.number().min(0, "Saldo deve ser positivo"),
-  yieldRate: z.coerce.number().min(0, "Taxa deve ser positiva"),
-  yieldFrequency: z.enum(["MONTHLY", "YEARLY", "NONE"]),
+  isDailyYield: z.boolean().default(false).optional(),
+  indexer: z.string().optional(),
+  yieldRate: z.coerce.number().optional(),
+  targetAmount: z.coerce.number().optional()
 });
 
 type InvestmentFormValues = z.infer<typeof formSchema>;
@@ -49,11 +53,25 @@ type InvestmentFormValues = z.infer<typeof formSchema>;
 interface InvestmentDialogProps {
   initialData?: InvestmentFormValues & { id: string };
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function InvestmentDialog({ initialData, trigger }: InvestmentDialogProps) {
-  const [open, setOpen] = useState(false);
+export function InvestmentDialog({ initialData, trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange }: InvestmentDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(newOpen);
+    }
+    if (controlledOnOpenChange) {
+      controlledOnOpenChange(newOpen);
+    }
+  };
 
   const isEditing = !!initialData;
 
@@ -61,23 +79,33 @@ export function InvestmentDialog({ initialData, trigger }: InvestmentDialogProps
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: initialData?.name || "",
-      type: initialData?.type || "CDB",
+      type: initialData?.type as "FIXED" | "VARIABLE" | "CRYPTO" || "FIXED",
       institution: initialData?.institution || "",
       balance: initialData?.balance || 0,
-      yieldRate: initialData?.yieldRate || 0,
-      yieldFrequency: initialData?.yieldFrequency || "NONE",
+      isDailyYield: initialData?.isDailyYield || false,
+      indexer: initialData?.indexer || "",
+      yieldRate: initialData?.yieldRate ? Number(initialData.yieldRate) : undefined,
+      targetAmount: initialData?.targetAmount ? Number(initialData.targetAmount) : undefined,
     },
   });
+
+  const investmentType = form.watch("type");
 
   async function onSubmit(values: InvestmentFormValues) {
     startTransition(async () => {
       try {
+        const payload = {
+          ...values,
+          indexer: values.type === "FIXED" ? values.indexer : null,
+          balance: !isEditing && values.type === "FIXED" ? 0 : values.balance,
+        };
+
         if (isEditing && initialData) {
-          await updateInvestment(initialData.id, values);
+          await updateInvestment(initialData.id, payload);
         } else {
-          await createInvestment(values);
+          await createInvestment(payload);
         }
-        setOpen(false);
+        handleOpenChange(false);
         if (!isEditing) {
           form.reset();
         }
@@ -88,7 +116,7 @@ export function InvestmentDialog({ initialData, trigger }: InvestmentDialogProps
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button className="gap-2">
@@ -126,9 +154,18 @@ export function InvestmentDialog({ initialData, trigger }: InvestmentDialogProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: CDB, LCI, Ações" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="FIXED">Caixinha / Renda Fixa</SelectItem>
+                        <SelectItem value="VARIABLE">Ações / Variável</SelectItem>
+                        <SelectItem value="CRYPTO">Criptomoedas</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -148,58 +185,97 @@ export function InvestmentDialog({ initialData, trigger }: InvestmentDialogProps
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="balance"
-              render={({ field }) => (
-                <CurrencyInput
-                  label="Saldo Atual"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+            {investmentType !== "FIXED" && (
+              <FormField
+                control={form.control}
+                name="balance"
+                render={({ field }) => (
+                  <CurrencyInput
+                    label="Saldo Atual"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="yieldRate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Taxa (%)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="yieldFrequency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Frequência</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="NONE">Nenhum</SelectItem>
-                        <SelectItem value="MONTHLY">Mensal</SelectItem>
-                        <SelectItem value="YEARLY">Anual</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {investmentType === "FIXED" && (
+              <div className="space-y-4 pt-4 border-t">
+                <FormField
+                  control={form.control}
+                  name="targetAmount"
+                  render={({ field }) => (
+                    <CurrencyInput
+                      label="Meta da Caixinha (Opcional)"
+                      value={field.value || 0}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="yieldRate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Taxa (%)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="indexer"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Indexador</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="CDI">CDI / DI</SelectItem>
+                            <SelectItem value="SELIC">Taxa Selic</SelectItem>
+                            <SelectItem value="IPCA">IPCA+</SelectItem>
+                            <SelectItem value="PREFIXED">Prefixado</SelectItem>
+                            <SelectItem value="OTHER">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+
+                  <FormField
+                    control={form.control}
+                    name="isDailyYield"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center justify-between shrink-0 space-y-0 h-full mt-2">
+                        <FormLabel className="text-xs">Rendimento<br />Diário?</FormLabel>
+                        <FormControl className="h-full mt-0">
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className={cn(field.value && "!bg-emerald-500")}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={isPending}>
               {isPending ? "Salvando..." : isEditing ? "Salvar" : "Adicionar"}

@@ -11,8 +11,9 @@ export async function createInvestment(data: {
   type: string;
   institution?: string;
   balance: number;
-  yieldRate: number;
-  yieldFrequency: "MONTHLY" | "YEARLY" | "NONE";
+  isDailyYield?: boolean;
+  targetAmount?: number;
+  yieldRate?: number;
 }) {
   let user = await prisma.user.findUnique({ where: { id: MOCK_USER_ID } });
   if (!user) {
@@ -43,8 +44,9 @@ export async function updateInvestment(
     type: string;
     institution?: string;
     balance: number;
-    yieldRate: number;
-    yieldFrequency: "MONTHLY" | "YEARLY" | "NONE";
+    isDailyYield?: boolean;
+    targetAmount?: number;
+    yieldRate?: number;
   }
 ) {
   await prisma.investment.update({
@@ -60,8 +62,25 @@ export async function deleteInvestment(id: string) {
     where: { investmentId: id },
   });
 
+  // Deletar os lotes primeiro
+  await prisma.investmentLot.deleteMany({
+    where: { investmentId: id },
+  });
+
   await prisma.investment.delete({
     where: { id },
   });
   revalidatePath("/investments");
+}
+
+export async function editInvestmentLot(lotId: string, data: any) {
+  // Stub: Implementar lógica futura
+  console.log("Edit lot", lotId, data);
+}
+
+export async function deleteInvestmentLot(lotId: string) {
+  // Stub: Implementar exclusão
+  // Lembrete: Ao excluir um lote, deve-se re-somar os lotes restantes
+  // e atualizar o 'balance' do 'Investment' pai correspondente.
+  console.log("Delete lot", lotId);
 }

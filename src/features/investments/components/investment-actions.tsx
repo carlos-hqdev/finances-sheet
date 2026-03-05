@@ -18,11 +18,9 @@ interface InvestmentActionsProps {
   investment: {
     id: string;
     name: string;
-    type: string;
+    type: string; // The db type is string, but we cast it
     institution: string | null;
     balance: Prisma.Decimal | any;
-    yieldRate: Prisma.Decimal | any;
-    yieldFrequency: string | null;
   };
 }
 
@@ -40,9 +38,8 @@ export function InvestmentActions({ investment }: InvestmentActionsProps) {
   // Converter tipos do prisma para compatibilidade com o form
   const formattedInvestment = {
     ...investment,
+    type: investment.type as "FIXED" | "VARIABLE" | "CRYPTO",
     balance: Number(investment.balance),
-    yieldRate: Number(investment.yieldRate),
-    yieldFrequency: investment.yieldFrequency as "MONTHLY" | "YEARLY" | "NONE",
     institution: investment.institution || undefined,
   };
 
