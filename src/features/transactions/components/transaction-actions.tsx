@@ -33,6 +33,7 @@ interface TransactionActionsProps {
   accounts: { id: string; name: string }[];
   categories: { id: string; name: string }[];
   creditCards: { id: string; name: string; accountId: string }[];
+  investments: { id: string; name: string }[];
 }
 
 export function TransactionActions({
@@ -40,6 +41,7 @@ export function TransactionActions({
   accounts,
   categories,
   creditCards,
+  investments,
 }: TransactionActionsProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -85,12 +87,14 @@ export function TransactionActions({
             accounts={accounts}
             categories={categories}
             creditCards={creditCards}
+            investments={investments}
             initialData={{
               ...transaction,
               amount: Number(transaction.amount),
               date: new Date(transaction.date),
               categoryId: transaction.categoryId || undefined,
               destinationAccountId: transaction.destinationAccountId || undefined,
+              investmentId: transaction.investmentId || undefined,
               creditCardId: transaction.creditCardId || undefined,
             }}
             trigger={

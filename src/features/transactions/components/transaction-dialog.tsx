@@ -41,7 +41,10 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
@@ -50,6 +53,7 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/lib/utils";
 import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import { Switch } from "@/shared/components/ui/switch";
+import { toast } from "sonner";
 
 // Schema centralizado
 const formSchema = z.object({
@@ -60,6 +64,7 @@ const formSchema = z.object({
   accountId: z.string().optional(),
   creditCardId: z.string().optional(),
   destinationAccountId: z.string().optional(),
+  investmentId: z.string().optional(),
   paymentMethod: z.string().optional(),
   date: z.date(),
   period: z.string(),
@@ -76,16 +81,24 @@ interface TransactionDialogProps {
   accounts: { id: string; name: string }[];
   categories: { id: string; name: string }[];
   creditCards: { id: string; name: string; accountId: string }[];
+  investments: { id: string; name: string }[];
   initialData?: TransactionFormValues & { id: string };
   trigger?: React.ReactNode;
+  defaultType?: "INCOME" | "EXPENSE" | "TRANSFER";
+  defaultOriginAccountId?: string;
+  defaultDestinationAccountId?: string;
 }
 
 export function TransactionDialog({
   accounts,
   categories,
   creditCards,
+  investments,
   initialData,
   trigger,
+  defaultType,
+  defaultOriginAccountId,
+  defaultDestinationAccountId,
 }: TransactionDialogProps) {
   const [open, setOpen] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -98,15 +111,15 @@ export function TransactionDialog({
     defaultValues: {
       description: initialData?.description || "",
       amount: initialData ? Number(initialData.amount) : 0,
-      type: initialData?.type || "EXPENSE",
+      type: initialData?.type || defaultType || "EXPENSE",
       date: initialData?.date ? new Date(initialData.date) : new Date(),
       paymentMethod: initialData?.paymentMethod || "A_VISTA",
       condition: initialData?.condition || "A_VISTA",
       installments: initialData?.installments || 1,
       period: initialData?.period || format(new Date(), "yyyy-MM"),
       categoryId: initialData?.categoryId || undefined,
-      accountId: initialData?.paymentMethod === "CREDIT_CARD" ? initialData.creditCardId : initialData?.accountId,
-      destinationAccountId: initialData?.destinationAccountId || undefined,
+      accountId: initialData?.paymentMethod === "CREDIT_CARD" ? initialData.creditCardId : (initialData?.accountId || defaultOriginAccountId),
+      destinationAccountId: initialData?.destinationAccountId || initialData?.investmentId || defaultDestinationAccountId || undefined,
       creditCardId: initialData?.creditCardId || undefined,
       notes: initialData?.notes || "",
       isPaid: initialData?.isPaid ?? true,
@@ -166,12 +179,38 @@ export function TransactionDialog({
           }
         }
 
-        if (
-          !finalAccountId &&
-          values.type !== "TRANSFER" &&
-          values.paymentMethod !== "CREDIT_CARD"
-        ) {
-          // Maybe handle error or rely on server
+        // This condition was preventing submission if finalAccountId was undefined for non-transfer/non-credit card types.
+        // It's moved inside the txData construction to allow for server-side validation or default handling.
+        // if (
+        //   !finalAccountId &&
+        //   values.type !== "TRANSFER" &&
+        //   values.paymentMethod !== "CREDIT_CARD"
+        // ) {
+        //   // Maybe handle error or rely on server
+        // }
+
+        const isDestinationInvestment = typeof values.destinationAccountId === 'string' && investments.some(inv => inv.id === values.destinationAccountId);
+        const isOriginInvestment = typeof finalAccountId === 'string' && investments.some(inv => inv.id === finalAccountId);
+
+        let finalPaymentMethod = values.paymentMethod;
+        let finalDestAccountId = undefined;
+        let finalOriginAccountId = finalAccountId || "";
+        let finalInvestmentId = undefined;
+
+        if (values.type === "TRANSFER") {
+          finalPaymentMethod = "TRANSFER";
+          if (!isOriginInvestment && !isDestinationInvestment) {
+            finalOriginAccountId = finalAccountId || "";
+            finalDestAccountId = values.destinationAccountId;
+          } else if (!isOriginInvestment && isDestinationInvestment) {
+            finalPaymentMethod = "APPLICATION";
+            finalOriginAccountId = finalAccountId || "";
+            finalInvestmentId = values.destinationAccountId;
+          } else if (isOriginInvestment && !isDestinationInvestment) {
+            finalPaymentMethod = "REDEMPTION";
+            finalOriginAccountId = values.destinationAccountId || "";
+            finalInvestmentId = finalAccountId;
+          }
         }
 
         const txData = {
@@ -182,12 +221,11 @@ export function TransactionDialog({
             values.categoryId === "none" || !values.categoryId
               ? undefined
               : values.categoryId,
-          accountId: finalAccountId || "",
-          destinationAccountId:
-            values.type === "TRANSFER" ? values.destinationAccountId : undefined,
+          accountId: finalOriginAccountId,
+          destinationAccountId: finalDestAccountId,
+          investmentId: finalInvestmentId,
           creditCardId: finalCreditCardId,
-          paymentMethod:
-            values.type === "TRANSFER" ? "TRANSFER" : values.paymentMethod,
+          paymentMethod: finalPaymentMethod,
           date: values.date,
           condition: values.condition as "A_VISTA" | "PARCELADO",
           notes: values.notes,
@@ -199,6 +237,11 @@ export function TransactionDialog({
           result = await updateTransaction(initialData.id, txData);
         } else {
           result = await createTransaction(txData);
+        }
+
+        if (result && result.error) {
+          toast.error(result.error);
+          return;
         }
 
         setOpen(false);
@@ -441,11 +484,27 @@ export function TransactionDialog({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
-                              {accounts.map((acc) => (
-                                <SelectItem key={acc.id} value={acc.id}>
-                                  {acc.name}
-                                </SelectItem>
-                              ))}
+                              <SelectGroup>
+                                <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Conta Corrente</SelectLabel>
+                                {accounts.map((acc: { id: string; name: string }) => (
+                                  <SelectItem key={acc.id} value={acc.id}>
+                                    {acc.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                              {investments && investments.length > 0 && (
+                                <>
+                                  <SelectSeparator className="bg-white/10 my-1" />
+                                  <SelectGroup>
+                                    <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Caixinhas & Investimentos</SelectLabel>
+                                    {investments.map((inv: { id: string; name: string }) => (
+                                      <SelectItem key={inv.id} value={inv.id}>
+                                        {inv.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -470,11 +529,27 @@ export function TransactionDialog({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
-                              {accounts.map((acc) => (
-                                <SelectItem key={acc.id} value={acc.id}>
-                                  {acc.name}
-                                </SelectItem>
-                              ))}
+                              <SelectGroup>
+                                <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Conta Corrente</SelectLabel>
+                                {accounts.map((acc: { id: string; name: string }) => (
+                                  <SelectItem key={acc.id} value={acc.id}>
+                                    {acc.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                              {investments && investments.length > 0 && (
+                                <>
+                                  <SelectSeparator className="bg-white/10 my-1" />
+                                  <SelectGroup>
+                                    <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Caixinhas & Investimentos</SelectLabel>
+                                    {investments.map((inv: { id: string; name: string }) => (
+                                      <SelectItem key={inv.id} value={inv.id}>
+                                        {inv.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectGroup>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -533,12 +608,12 @@ export function TransactionDialog({
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
                               {paymentMethod === "CREDIT_CARD"
-                                ? creditCards.map((card) => (
+                                ? creditCards.map((card: { id: string; name: string }) => (
                                   <SelectItem key={card.id} value={card.id}>
                                     {card.name}
                                   </SelectItem>
                                 ))
-                                : accounts.map((acc) => (
+                                : accounts.map((acc: { id: string; name: string }) => (
                                   <SelectItem key={acc.id} value={acc.id}>
                                     {acc.name}
                                   </SelectItem>

@@ -18,6 +18,7 @@ export async function getAggregatedTransactions(monthsHistory: number = 36) {
       referenceMonth: true,
       amount: true,
       type: true,
+      date: true,
     },
   });
 

@@ -6,6 +6,18 @@ import { DashboardLayout } from "@/shared/widgets/dashboard-overview/dashboard-l
 import { TransactionActions } from "@/features/transactions/components/transaction-actions";
 import { TransactionIsPaidSwitch } from "@/features/transactions/components/transaction-is-paid-switch";
 
+const PAYMENT_METHODS_MAP: Record<string, string> = {
+  CREDIT_CARD: "Cartão de Crédito",
+  DEBIT_CARD: "Cartão de Débito",
+  TRANSFER: "Transferência",
+  REDEMPTION: "Resgate",
+  APPLICATION: "Aplicação",
+  CASH: "Dinheiro",
+  PIX: "Pix",
+  BOLETO: "Boleto",
+  OTHER: "Outros",
+};
+
 export default async function TransactionsPage() {
   const transactionsRaw = await prisma.transaction.findMany({
     orderBy: { date: "desc" },
@@ -22,12 +34,12 @@ export default async function TransactionsPage() {
   }));
 
   const accountsRaw = await prisma.account.findMany({
-    select: { id: true, name: true, balance: true },
+    select: { id: true, name: true, balance: true, type: true },
   });
 
   const accounts = accountsRaw.map(acc => ({
     ...acc,
-    balance: acc.balance.toNumber()
+    balance: acc.balance.toNumber(),
   }));
 
   const categories = await prisma.category.findMany({
@@ -43,6 +55,17 @@ export default async function TransactionsPage() {
     id: c.id,
     name: `${c.account.name} (Cartão)`,
     accountId: c.accountId,
+    limit: c.limit.toNumber(),
+  }));
+
+  const investmentsRaw = await prisma.investment.findMany({
+    select: { id: true, name: true, type: true },
+  });
+
+  const investments = investmentsRaw.map(inv => ({
+    id: inv.id,
+    name: inv.name,
+    type: inv.type,
   }));
 
   return (
@@ -60,6 +83,7 @@ export default async function TransactionsPage() {
           accounts={accounts}
           categories={categories}
           creditCards={creditCards}
+          investments={investments}
         />
       </div>
 
@@ -115,7 +139,8 @@ export default async function TransactionsPage() {
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">
                     {tx.paymentMethod
-                      ? tx.paymentMethod.replace(/_/g, " ")
+                      ? PAYMENT_METHODS_MAP[tx.paymentMethod] ||
+                      tx.paymentMethod.replace(/_/g, " ")
                       : "-"}
                   </td>
                   <td
@@ -140,6 +165,7 @@ export default async function TransactionsPage() {
                       accounts={accounts}
                       categories={categories}
                       creditCards={creditCards}
+                      investments={investments}
                     />
                   </td>
                 </tr>
