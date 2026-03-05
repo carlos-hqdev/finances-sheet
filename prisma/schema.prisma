@@ -27,9 +27,6 @@ model Account {
   institution String?
   balance     Decimal  @default(0)
   color       String?  // Hex code
-  yieldRate   Decimal? // For "Caixinhas" / Savings
-  isDailyYield Boolean @default(false)
-  lastYieldDate DateTime?
   
   user        User     @relation(fields: [userId], references: [id])
   transactions Transaction[] @relation("AccountTransactions")
@@ -72,6 +69,7 @@ model Transaction {
   accountId   String
   categoryId  String?
   creditCardId String?
+  investmentId String?
   
   amount      Decimal
   type        String   // INCOME, EXPENSE, TRANSFER
@@ -89,6 +87,8 @@ model Transaction {
   account     Account  @relation(fields: [accountId], references: [id], name: "AccountTransactions")
   category    Category? @relation(fields: [categoryId], references: [id])
   creditCard  CreditCard? @relation(fields: [creditCardId], references: [id])
+  investment  Investment? @relation(fields: [investmentId], references: [id])
+  investmentLots InvestmentLot[]
   
   referenceMonth String? // Format: "YYYY-MM"
   invoiceId   String?
@@ -147,14 +147,18 @@ model Investment {
   name        String
   type        String   // VARIABLE, FIXED, CRYPTO, ETC
   category    String?
+  targetAmount Decimal? // Goal amount for Savings
   amount      Decimal? // Quantity held
   balance     Decimal  @default(0) // Current monetary value (manual update)
   yieldRate   Decimal?
-  yieldFrequency String? // e.g. "MONTHLY", "DAILY"
+  isDailyYield Boolean @default(false)
+  indexer     String?  // CDI, SELIC, IPCA, PREFIXED, OTHER
   institution String?
   
   user        User     @relation(fields: [userId], references: [id])
   history     InvestmentHistory[]
+  lots        InvestmentLot[]
+  transactions Transaction[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -169,4 +173,21 @@ model InvestmentHistory {
   investment   Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
 
   createdAt    DateTime   @default(now())
+}
+
+model InvestmentLot {
+  id               String       @id @default(cuid())
+  investmentId     String
+  transactionId    String
+  date             DateTime
+  quantity         Decimal?
+  originalPrice    Decimal
+  currentBalance   Decimal
+  isFullyWithdrawn Boolean      @default(false)
+  
+  investment       Investment   @relation(fields: [investmentId], references: [id])
+  transaction      Transaction  @relation(fields: [transactionId], references: [id])
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }
