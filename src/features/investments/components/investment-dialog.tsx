@@ -39,7 +39,7 @@ import { Database } from "lucide-react"; // Or another appropriate icon
 
 const formSchema = z.object({
   name: z.string().min(2, "Obrigatório"),
-  type: z.enum(["FIXED", "VARIABLE", "CRYPTO"]),
+  type: z.enum(["SAVINGS", "FIXED", "VARIABLE", "CRYPTO"]),
   institution: z.string().optional(),
   balance: z.coerce.number().min(0, "Saldo deve ser positivo"),
   isDailyYield: z.boolean().default(false).optional(),
@@ -79,7 +79,7 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: initialData?.name || "",
-      type: initialData?.type as "FIXED" | "VARIABLE" | "CRYPTO" || "FIXED",
+      type: initialData?.type as "SAVINGS" | "FIXED" | "VARIABLE" | "CRYPTO" || "SAVINGS",
       institution: initialData?.institution || "",
       balance: initialData?.balance || 0,
       isDailyYield: initialData?.isDailyYield || false,
@@ -96,8 +96,8 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
       try {
         const payload = {
           ...values,
-          indexer: values.type === "FIXED" ? values.indexer : null,
-          balance: !isEditing && values.type === "FIXED" ? 0 : values.balance,
+          indexer: (values.type === "FIXED" || values.type === "SAVINGS") ? values.indexer : null,
+          balance: !isEditing && values.type === "SAVINGS" ? 0 : values.balance,
         };
 
         if (isEditing && initialData) {
@@ -161,7 +161,8 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="FIXED">Caixinha / Renda Fixa</SelectItem>
+                        <SelectItem value="SAVINGS">Caixinha / Reserva</SelectItem>
+                        <SelectItem value="FIXED">Renda Fixa / Tesouro / CDB</SelectItem>
                         <SelectItem value="VARIABLE">Ações / Variável</SelectItem>
                         <SelectItem value="CRYPTO">Criptomoedas</SelectItem>
                       </SelectContent>
@@ -185,7 +186,7 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
               />
             </div>
 
-            {investmentType !== "FIXED" && (
+            {investmentType !== "SAVINGS" && (
               <FormField
                 control={form.control}
                 name="balance"
@@ -199,7 +200,7 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
               />
             )}
 
-            {investmentType === "FIXED" && (
+            {(investmentType === "FIXED" || investmentType === "SAVINGS") && (
               <div className="space-y-4 pt-4 border-t">
                 <FormField
                   control={form.control}

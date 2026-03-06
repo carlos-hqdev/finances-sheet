@@ -62,19 +62,23 @@ async function main() {
     },
   });
 
-  console.log("Criando Caixinhas (Investments)...");
+  console.log("Criando Caixinhas e Investimentos...");
   const now = new Date();
   const currentMonthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const dMinus2 = new Date(now.getFullYear(), now.getMonth() - 2, 1);
 
+  // 1. SAVINGS
   const invReserva = await prisma.investment.create({
     data: {
       userId: user.id,
       name: "Reserva de Emergência",
-      type: "FIXED",
+      type: "SAVINGS",
       institution: "Mercado Pago",
       balance: 5000,
       targetAmount: 10000,
+      indexer: "CDI",
+      yieldRate: 100,
+      isDailyYield: true,
     },
   });
   const txReserva = await prisma.transaction.create({
@@ -101,70 +105,107 @@ async function main() {
     }
   });
 
-  const invDividas = await prisma.investment.create({
+  // 2. FIXED
+  const invCDB = await prisma.investment.create({
     data: {
       userId: user.id,
-      name: "Regularizar Dívidas",
+      name: "CDB IPCA+ 2029",
       type: "FIXED",
-      institution: "Mercado Pago",
-      balance: 1000,
-      targetAmount: 3000,
-    },
-  });
-  const txDividas = await prisma.transaction.create({
-    data: {
-      accountId: accountNubank.id,
-      investmentId: invDividas.id,
-      amount: 1000,
-      type: "TRANSFER",
-      paymentMethod: "APPLICATION",
-      date: dMinus2,
-      description: "Aporte Inicial Dívidas",
-      isPaid: true,
-      referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
-    }
-  });
-  await prisma.investmentLot.create({
-    data: {
-      investmentId: invDividas.id,
-      transactionId: txDividas.id,
-      date: dMinus2,
-      originalPrice: 1000,
-      currentBalance: 1000,
-      isFullyWithdrawn: false,
-    }
-  });
-
-  const invCasa = await prisma.investment.create({
-    data: {
-      userId: user.id,
-      name: "Comprar Casa",
-      type: "FIXED",
-      institution: "Nubank",
+      institution: "XP Investimentos",
       balance: 15000,
-      targetAmount: 100000,
+      indexer: "IPCA",
+      yieldRate: 6.5,
+      isDailyYield: false,
     },
   });
-  const txCasa = await prisma.transaction.create({
+  const txCDB = await prisma.transaction.create({
     data: {
       accountId: accountNubank.id,
-      investmentId: invCasa.id,
+      investmentId: invCDB.id,
       amount: 15000,
       type: "TRANSFER",
       paymentMethod: "APPLICATION",
       date: dMinus2,
-      description: "Aporte Inicial Casa",
+      description: "Aporte Inicial CDB",
       isPaid: true,
       referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
     }
   });
   await prisma.investmentLot.create({
     data: {
-      investmentId: invCasa.id,
-      transactionId: txCasa.id,
+      investmentId: invCDB.id,
+      transactionId: txCDB.id,
       date: dMinus2,
       originalPrice: 15000,
       currentBalance: 15000,
+      isFullyWithdrawn: false,
+    }
+  });
+
+  // 3. VARIABLE
+  const invAcoes = await prisma.investment.create({
+    data: {
+      userId: user.id,
+      name: "Carteira de Ações",
+      type: "VARIABLE",
+      institution: "BTG Pactual",
+      balance: 12500,
+    },
+  });
+  const txAcoes = await prisma.transaction.create({
+    data: {
+      accountId: accountBradesco.id,
+      investmentId: invAcoes.id,
+      amount: 12500,
+      type: "TRANSFER",
+      paymentMethod: "APPLICATION",
+      date: dMinus2,
+      description: "Aporte Inicial Ações",
+      isPaid: true,
+      referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
+    }
+  });
+  await prisma.investmentLot.create({
+    data: {
+      investmentId: invAcoes.id,
+      transactionId: txAcoes.id,
+      date: dMinus2,
+      originalPrice: 12500,
+      currentBalance: 12500,
+      isFullyWithdrawn: false,
+    }
+  });
+
+  // 4. CRYPTO
+  const invCrypto = await prisma.investment.create({
+    data: {
+      userId: user.id,
+      name: "Bitcoin (BTC)",
+      type: "CRYPTO",
+      institution: "Binance",
+      balance: 8000,
+    },
+  });
+  const txCrypto = await prisma.transaction.create({
+    data: {
+      accountId: accountNubank.id,
+      investmentId: invCrypto.id,
+      amount: 8000,
+      type: "TRANSFER",
+      paymentMethod: "APPLICATION",
+      date: dMinus2,
+      description: "Aporte Inicial Crypto",
+      isPaid: true,
+      referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
+    }
+  });
+  await prisma.investmentLot.create({
+    data: {
+      investmentId: invCrypto.id,
+      transactionId: txCrypto.id,
+      date: dMinus2,
+      originalPrice: 8000,
+      currentBalance: 8000,
       isFullyWithdrawn: false,
     }
   });
@@ -265,23 +306,34 @@ async function main() {
     },
     {
       accountId: accountNubank.id,
-      investmentId: invCasa.id,
+      investmentId: invCDB.id,
       amount: 300,
       type: "TRANSFER",
       paymentMethod: "APPLICATION",
       date: new Date(now.getFullYear(), now.getMonth(), 7),
-      description: "Aporte Casa",
+      description: "Aporte CDB",
+      isPaid: true,
+      referenceMonth: currentMonthYear,
+    },
+    {
+      accountId: accountBradesco.id,
+      investmentId: invAcoes.id,
+      amount: 200,
+      type: "TRANSFER",
+      paymentMethod: "APPLICATION",
+      date: new Date(now.getFullYear(), now.getMonth(), 8),
+      description: "Aporte Ações",
       isPaid: true,
       referenceMonth: currentMonthYear,
     },
     {
       accountId: accountNubank.id,
-      investmentId: invDividas.id,
-      amount: 200,
+      investmentId: invCrypto.id,
+      amount: 100,
       type: "TRANSFER",
       paymentMethod: "APPLICATION",
-      date: new Date(now.getFullYear(), now.getMonth(), 8),
-      description: "Aporte Dívidas",
+      date: new Date(now.getFullYear(), now.getMonth(), 9),
+      description: "Aporte Crypto",
       isPaid: true,
       referenceMonth: currentMonthYear,
     },

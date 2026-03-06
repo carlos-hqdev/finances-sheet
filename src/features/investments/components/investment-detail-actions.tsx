@@ -43,7 +43,7 @@ export function InvestmentDetailActions({ investment }: InvestmentDetailActionsP
         onOpenChange={setIsEditDialogOpen}
         initialData={{
           ...investment,
-          type: investment.type as "FIXED" | "VARIABLE" | "CRYPTO",
+          type: investment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "CRYPTO",
           institution: investment.institution ?? undefined,
           targetAmount: investment.targetAmount ?? undefined,
           yieldRate: investment.yieldRate ?? undefined,

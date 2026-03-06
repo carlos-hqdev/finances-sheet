@@ -38,7 +38,7 @@ export function InvestmentActions({ investment }: InvestmentActionsProps) {
   // Converter tipos do prisma para compatibilidade com o form
   const formattedInvestment = {
     ...investment,
-    type: investment.type as "FIXED" | "VARIABLE" | "CRYPTO",
+    type: investment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "CRYPTO",
     balance: Number(investment.balance),
     institution: investment.institution || undefined,
   };

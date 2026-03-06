@@ -35,11 +35,8 @@ export function SavingsList({ investments }: SavingsListProps) {
   const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Filter for 'FIXED' type (Caixinhas) and group by institution
   const groupedSavings = useMemo(() => {
-    const fixedInvestments = investments.filter((inv) => inv.type === "FIXED");
-
-    return fixedInvestments.reduce((acc, investment) => {
+    return investments.reduce((acc, investment) => {
       const institution = investment.institution || "Outros";
       if (!acc[institution]) {
         acc[institution] = [];
@@ -54,7 +51,7 @@ export function SavingsList({ investments }: SavingsListProps) {
       <Card>
         <CardContent className="flex flex-col items-center justify-center p-6 text-muted-foreground">
           <PiggyBank className="h-12 w-12 mb-4 opacity-50" />
-          <p>Você ainda não possui caixinhas ou investimentos de renda fixa.</p>
+          <p>Você ainda não possui investimentos deste tipo.</p>
         </CardContent>
       </Card>
     );
@@ -119,7 +116,7 @@ export function SavingsList({ investments }: SavingsListProps) {
                         <CardTitle className="text-base flex justify-between items-center pr-2">
                           <div className="flex items-center gap-2 truncate">
                             <span className="truncate">{saving.name}</span>
-                            {saving.type === "FIXED" && saving.indexer && saving.indexer !== "OTHER" && (
+                            {(saving.type === "FIXED" || saving.type === "SAVINGS") && saving.indexer && saving.indexer !== "OTHER" && (
                               <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm shrink-0">
                                 {saving.indexer === "PREFIXED" ? "PRÉ" : saving.indexer}
                               </span>
@@ -171,7 +168,7 @@ export function SavingsList({ investments }: SavingsListProps) {
           editingInvestment
             ? {
               ...editingInvestment,
-              type: editingInvestment.type as "FIXED" | "VARIABLE" | "CRYPTO",
+              type: editingInvestment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "CRYPTO",
               institution: editingInvestment.institution ?? undefined,
               targetAmount: editingInvestment.targetAmount ?? undefined,
               indexer: editingInvestment.indexer ?? undefined,

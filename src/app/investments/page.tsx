@@ -25,8 +25,9 @@ export default async function InvestmentsPage() {
     updatedAt: inv.updatedAt,
   }));
 
+  const savingsInvestments = investments.filter((inv) => inv.type === "SAVINGS");
   const fixedInvestments = investments.filter((inv) => inv.type === "FIXED");
-  const otherInvestments = investments.filter((inv) => inv.type !== "FIXED");
+  const otherInvestments = investments.filter((inv) => inv.type !== "FIXED" && inv.type !== "SAVINGS");
 
   return (
     <DashboardLayout>
@@ -46,8 +47,17 @@ export default async function InvestmentsPage() {
         {/* Seção das Caixinhas */}
         <div>
           <div className="mb-4">
-            <h3 className="text-xl font-semibold tracking-tight">Minhas Caixinhas</h3>
-            <p className="text-sm text-muted-foreground">Suas reservas e objetivos financeiros (Renda Fixa)</p>
+            <h3 className="text-xl font-semibold tracking-tight">Minhas Caixinhas (Liquidez Diária)</h3>
+            <p className="text-sm text-muted-foreground">Suas reservas e objetivos de curto prazo</p>
+          </div>
+          <SavingsList investments={savingsInvestments} />
+        </div>
+
+        {/* Seção de Renda Fixa */}
+        <div>
+          <div className="mb-4">
+            <h3 className="text-xl font-semibold tracking-tight">Renda Fixa</h3>
+            <p className="text-sm text-muted-foreground">Investimentos para o futuro (Tesouro Direto, CDBs de liquidez no vencimento, etc)</p>
           </div>
           <SavingsList investments={fixedInvestments} />
         </div>
