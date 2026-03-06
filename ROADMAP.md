@@ -8,6 +8,7 @@
 - [ ] Dashboard Dinâmico: Substituir os dados estáticos/desenhados por dados reais puxados do banco de dados (Prisma).
 
 ## v1.1.0
+- [ ] Página de Configurações Globais: Interface para o usuário parametrizar variáveis econômicas (ex: valor atual do CDI, Selic) para uso dinâmico no cálculo de rendimentos das caixinhas.
 - [ ] Visão Detalhada e Separação de Renda Fixa (IPCA/Selic/CDI).
 - [ ] Módulo de Metas Financeiras (Atreladas a Caixinhas ou soltas).
 - [ ] Categorização automática de lançamentos e análise de despesas por categoria.

@@ -25,6 +25,8 @@ interface Investment {
   targetAmount: number | null;
   institution: string | null;
   indexer: string | null;
+  yieldRate?: number | null;
+  isDailyYield?: boolean;
 }
 
 interface SavingsListProps {
@@ -163,15 +165,22 @@ export function SavingsList({ investments }: SavingsListProps) {
 
       <InvestmentDialog
         open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setTimeout(() => setEditingInvestment(null), 300);
+          }
+        }}
         initialData={
           editingInvestment
             ? {
               ...editingInvestment,
-              type: editingInvestment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "CRYPTO",
+              type: editingInvestment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "FIIS" | "CRYPTO" | "OTHER",
               institution: editingInvestment.institution ?? undefined,
               targetAmount: editingInvestment.targetAmount ?? undefined,
               indexer: editingInvestment.indexer ?? undefined,
+              yieldRate: editingInvestment.yieldRate ?? undefined,
+              isDailyYield: editingInvestment.isDailyYield ?? undefined,
             }
             : undefined
         }

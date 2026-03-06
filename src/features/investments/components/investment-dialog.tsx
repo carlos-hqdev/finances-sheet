@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
@@ -39,7 +39,7 @@ import { Database } from "lucide-react"; // Or another appropriate icon
 
 const formSchema = z.object({
   name: z.string().min(2, "Obrigatório"),
-  type: z.enum(["SAVINGS", "FIXED", "VARIABLE", "CRYPTO"]),
+  type: z.enum(["SAVINGS", "FIXED", "VARIABLE", "FIIS", "CRYPTO", "OTHER"]),
   institution: z.string().optional(),
   balance: z.coerce.number().min(0, "Saldo deve ser positivo"),
   isDailyYield: z.boolean().default(false).optional(),
@@ -79,7 +79,7 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: initialData?.name || "",
-      type: initialData?.type as "SAVINGS" | "FIXED" | "VARIABLE" | "CRYPTO" || "SAVINGS",
+      type: initialData?.type as "SAVINGS" | "FIXED" | "VARIABLE" | "FIIS" | "CRYPTO" | "OTHER" || "SAVINGS",
       institution: initialData?.institution || "",
       balance: initialData?.balance || 0,
       isDailyYield: initialData?.isDailyYield || false,
@@ -90,6 +90,35 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
   });
 
   const investmentType = form.watch("type");
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: initialData?.name || "",
+        type: (initialData?.type as any) || "SAVINGS",
+        institution: initialData?.institution || "",
+        balance: initialData?.balance || 0,
+        isDailyYield: initialData?.isDailyYield || false,
+        indexer: initialData?.indexer || "",
+        yieldRate: initialData?.yieldRate ? Number(initialData.yieldRate) : undefined,
+        targetAmount: initialData?.targetAmount ? Number(initialData.targetAmount) : undefined,
+      });
+    } else {
+      const timeoutId = setTimeout(() => {
+        form.reset({
+          name: "",
+          type: "SAVINGS",
+          institution: "",
+          balance: 0,
+          isDailyYield: false,
+          indexer: "",
+          yieldRate: undefined,
+          targetAmount: undefined,
+        });
+      }, 300);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [open, initialData, form]);
 
   async function onSubmit(values: InvestmentFormValues) {
     startTransition(async () => {
@@ -117,14 +146,16 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="gap-2">
-            <Database className="w-4 h-4" />
-            Novo Investimento
-          </Button>
-        )}
-      </DialogTrigger>
+      {(!isControlled || trigger) && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button className="gap-2">
+              <Database className="w-4 h-4" />
+              Novo Investimento
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -161,10 +192,12 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="SAVINGS">Caixinha / Reserva</SelectItem>
-                        <SelectItem value="FIXED">Renda Fixa / Tesouro / CDB</SelectItem>
-                        <SelectItem value="VARIABLE">Ações / Variável</SelectItem>
-                        <SelectItem value="CRYPTO">Criptomoedas</SelectItem>
+                        <SelectItem value="SAVINGS">Reserva / Caixinha</SelectItem>
+                        <SelectItem value="FIXED" disabled>Renda Fixa (Em breve)</SelectItem>
+                        <SelectItem value="VARIABLE" disabled>Ações BR (Em breve)</SelectItem>
+                        <SelectItem value="FIIS" disabled>FIIs (Em breve)</SelectItem>
+                        <SelectItem value="CRYPTO" disabled>Cripto (Em breve)</SelectItem>
+                        <SelectItem value="OTHER" disabled>Outros (Em breve)</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

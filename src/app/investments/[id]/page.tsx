@@ -3,6 +3,8 @@ import Link from "next/link";
 import { prisma } from "@/shared/lib/db";
 import { formatCurrency } from "@/shared/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table";
+import { format } from "date-fns";
 import { Progress } from "@/shared/components/ui/progress";
 import { Button } from "@/shared/components/ui/button";
 import { Landmark, PiggyBank, Target, Percent, ArrowLeft, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
@@ -22,6 +24,9 @@ export default async function InvestmentDetailPage({ params }: InvestmentDetailP
     where: { id },
     include: {
       lots: {
+        orderBy: { date: "desc" },
+      },
+      transactions: {
         orderBy: { date: "desc" },
       },
     },
@@ -112,11 +117,22 @@ export default async function InvestmentDetailPage({ params }: InvestmentDetailP
                 <span>{investment.institution || "Outros"}</span>
                 <span className="mx-2">•</span>
                 <span className="uppercase text-xs font-semibold tracking-wider">
-                  {investment.type === "FIXED"
-                    ? "Renda Fixa"
-                    : investment.type === "VARIABLE"
-                      ? "Renda Variável"
-                      : "Cripto"}
+                  {(() => {
+                    const tipoFormatado = {
+                      SAVINGS: "Reserva / Caixinha",
+                      FIXED: "Renda Fixa",
+                      VARIABLE: "Renda Variável",
+                      CRYPTO: "Criptomoedas",
+                      FIIS: "Fundos Imobiliários",
+                      OTHER: "Outros",
+                    }[investment.type] || investment.type;
+
+                    const indexador = investment.indexer && investment.indexer !== "OTHER"
+                      ? ` (${investment.indexer === "PREFIXED" ? "PRÉ" : investment.indexer})`
+                      : "";
+
+                    return `${tipoFormatado}${indexador}`;
+                  })()}
                 </span>
               </div>
             </div>
@@ -207,6 +223,44 @@ export default async function InvestmentDetailPage({ params }: InvestmentDetailP
         <div className="mt-8">
           <h3 className="text-xl font-semibold mb-4 text-foreground">Aportes e Lotes (PEPS)</h3>
           <InvestmentLotTable lots={mappedLots} investmentId={investment.id} />
+        </div>
+
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-4 text-foreground">Extrato da Caixinha</h3>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="pl-6">Data</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead className="text-right pr-6">Valor</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {investment.transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                        Nenhuma transação encontrada.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    investment.transactions.map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell className="pl-6 text-muted-foreground">
+                          {format(tx.date, "dd/MM/yyyy")}
+                        </TableCell>
+                        <TableCell className="font-medium">{tx.description}</TableCell>
+                        <TableCell className={`text-right pr-6 font-semibold ${tx.type === 'INCOME' || (tx.type === 'TRANSFER' && tx.paymentMethod === 'APPLICATION') ? 'text-emerald-500' : 'text-foreground'}`}>
+                          {tx.type === 'INCOME' || (tx.type === 'TRANSFER' && tx.paymentMethod === 'APPLICATION') ? '+' : '-'}{formatCurrency(tx.amount.toNumber())}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </DashboardLayout>

@@ -1,10 +1,25 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { InvestmentActions } from "@/features/investments/components/investment-actions";
 import { InvestmentDialog } from "@/features/investments/components/investment-dialog";
 import { SavingsList } from "@/features/investments/components/savings-list";
 import { prisma } from "@/shared/lib/db";
 import { DashboardLayout } from "@/shared/widgets/dashboard-overview/dashboard-layout";
+import { Lock } from "lucide-react";
+
+function FutureSection({ title, description, genericName }: { title: string, description: string, genericName: string }) {
+  return (
+    <div className="opacity-80">
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-muted-foreground tracking-tight flex items-center gap-2">
+          {title}
+        </h3>
+        <p className="text-sm text-muted-foreground/70">{description}</p>
+      </div>
+      <div className="rounded-lg border border-dashed border-border py-8 flex flex-col items-center justify-center bg-muted/20 text-muted-foreground">
+        <Lock className="w-8 h-8 mb-3 opacity-20" />
+        <p className="font-medium text-center px-4">Em breve: Controle de {genericName} será liberado na versão 1.1.0</p>
+      </div>
+    </div>
+  );
+}
 
 export default async function InvestmentsPage() {
   const investmentsRaw = await prisma.investment.findMany({
@@ -25,9 +40,7 @@ export default async function InvestmentsPage() {
     updatedAt: inv.updatedAt,
   }));
 
-  const savingsInvestments = investments.filter((inv) => inv.type === "SAVINGS");
-  const fixedInvestments = investments.filter((inv) => inv.type === "FIXED");
-  const otherInvestments = investments.filter((inv) => inv.type !== "FIXED" && inv.type !== "SAVINGS");
+  const activeInvestments = investments.filter((inv) => inv.type === "SAVINGS");
 
   return (
     <DashboardLayout>
@@ -47,72 +60,17 @@ export default async function InvestmentsPage() {
         {/* Seção das Caixinhas */}
         <div>
           <div className="mb-4">
-            <h3 className="text-xl font-semibold tracking-tight">Minhas Caixinhas (Liquidez Diária)</h3>
-            <p className="text-sm text-muted-foreground">Suas reservas e objetivos de curto prazo</p>
+            <h3 className="text-xl font-semibold tracking-tight">Minhas Caixinhas</h3>
+            <p className="text-sm text-muted-foreground">Suas reservas e objetivos</p>
           </div>
-          <SavingsList investments={savingsInvestments} />
+          <SavingsList investments={activeInvestments} />
         </div>
 
-        {/* Seção de Renda Fixa */}
-        <div>
-          <div className="mb-4">
-            <h3 className="text-xl font-semibold tracking-tight">Renda Fixa</h3>
-            <p className="text-sm text-muted-foreground">Investimentos para o futuro (Tesouro Direto, CDBs de liquidez no vencimento, etc)</p>
-          </div>
-          <SavingsList investments={fixedInvestments} />
-        </div>
-
-        {/* Seção de Outros Ativos */}
-        <div>
-          <div className="mb-4">
-            <h3 className="text-xl font-semibold tracking-tight">Outros Ativos</h3>
-            <p className="text-sm text-muted-foreground">Renda variável, Criptomoedas e outros ativos</p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {otherInvestments.length === 0 ? (
-              <div className="col-span-full py-12 text-center text-muted-foreground border border-dashed border-border rounded-lg">
-                Você ainda não possui outros ativos cadastrados.
-              </div>
-            ) : (
-              otherInvestments.map((inv) => (
-                <div
-                  key={inv.id}
-                  className="relative rounded-lg border border-border bg-card p-6 hover:bg-accent transition-colors"
-                >
-                  <InvestmentActions investment={inv} />
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-500 ring-1 ring-inset ring-emerald-500/20 mb-2">
-                          {inv.type}
-                        </span>
-                        <h3 className="text-lg font-semibold text-card-foreground">
-                          {inv.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {inv.institution || "Instituição não informada"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex-grow flex flex-col justify-end">
-                      <p className="text-sm text-muted-foreground">Saldo Atual</p>
-                      <p className="text-2xl font-bold text-card-foreground">
-                        {new Intl.NumberFormat("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        }).format(Number(inv.balance))}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Atualizado em{" "}
-                        {format(inv.updatedAt, "dd 'de' MMM, yyyy", { locale: ptBR })}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <FutureSection title="Fixas (Tesouro, CDBs longos)" description="Títulos públicos e privados travados até o vencimento." genericName="Fixas" />
+        <FutureSection title="Ações (BR)" description="Ações negociadas na B3." genericName="Ações" />
+        <FutureSection title="FIIs" description="Fundos Imobiliários e Fiagros." genericName="FIIs" />
+        <FutureSection title="Cripto" description="Bitcoin, Ethereum e outras criptomoedas." genericName="Cripto" />
+        <FutureSection title="Outros Investimentos" description="Previdência privada, exterior, etc." genericName="Outros Investimentos" />
       </div>
     </DashboardLayout>
   );
