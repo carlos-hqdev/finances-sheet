@@ -1,32 +1,38 @@
 import { CreditCard, DollarSign, TrendingUp, Wallet } from "lucide-react";
 import { SummaryCard } from "@/features/dashboard/components/summary-card";
 import { DashboardLayout } from "@/shared/widgets/dashboard-overview/dashboard-layout";
+import { getDashboardBalances, getCurrentMonthTransactions } from "@/features/dashboard/actions";
 
-export default function Home() {
+export default async function Home() {
+  const MOCK_USER_ID = "cm4nt3q2v0000abc123456789";
+
+  const { totalBalance, totalInvestments } = await getDashboardBalances(MOCK_USER_ID);
+  const { incomes, expenses } = await getCurrentMonthTransactions(MOCK_USER_ID);
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
   return (
     <DashboardLayout>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           title="Saldo Total"
-          value="R$ 12.450,00"
+          value={formatCurrency(totalBalance)}
           icon={Wallet}
-          trend={{ value: 2.5, isPositive: true }}
         />
         <SummaryCard
           title="Receitas"
-          value="R$ 5.230,00"
+          value={formatCurrency(incomes)}
           icon={TrendingUp}
-          description="+10% vs mês passado"
         />
         <SummaryCard
           title="Despesas"
-          value="R$ 3.100,00"
+          value={formatCurrency(expenses)}
           icon={CreditCard}
-          trend={{ value: 5, isPositive: false }}
         />
         <SummaryCard
           title="Investimentos"
-          value="R$ 1.000,00"
+          value={formatCurrency(totalInvestments)}
           icon={DollarSign}
         />
       </div>
