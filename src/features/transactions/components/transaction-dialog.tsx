@@ -15,10 +15,15 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
-import { createTransaction, updateTransaction } from "@/features/transactions/actions/transaction-actions";
+import {
+  createTransaction,
+  updateTransaction,
+} from "@/features/transactions/actions/transaction-actions";
 import { Button } from "@/shared/components/ui/button";
 import { Calendar } from "@/shared/components/ui/calendar";
+import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import {
   Dialog,
   DialogContent,
@@ -48,12 +53,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Switch } from "@/shared/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { cn } from "@/shared/lib/utils";
-import { CurrencyInput } from "@/shared/components/ui/currency-input";
-import { Switch } from "@/shared/components/ui/switch";
-import { toast } from "sonner";
 
 // Schema centralizado
 const formSchema = z.object({
@@ -118,8 +121,15 @@ export function TransactionDialog({
       installments: initialData?.installments || 1,
       period: initialData?.period || format(new Date(), "yyyy-MM"),
       categoryId: initialData?.categoryId || undefined,
-      accountId: initialData?.paymentMethod === "CREDIT_CARD" ? initialData.creditCardId : (initialData?.accountId || defaultOriginAccountId),
-      destinationAccountId: initialData?.destinationAccountId || initialData?.investmentId || defaultDestinationAccountId || undefined,
+      accountId:
+        initialData?.paymentMethod === "CREDIT_CARD"
+          ? initialData.creditCardId
+          : initialData?.accountId || defaultOriginAccountId,
+      destinationAccountId:
+        initialData?.destinationAccountId ||
+        initialData?.investmentId ||
+        defaultDestinationAccountId ||
+        undefined,
       creditCardId: initialData?.creditCardId || undefined,
       notes: initialData?.notes || "",
       isPaid: initialData?.isPaid ?? true,
@@ -189,13 +199,17 @@ export function TransactionDialog({
         //   // Maybe handle error or rely on server
         // }
 
-        const isDestinationInvestment = typeof values.destinationAccountId === 'string' && investments.some(inv => inv.id === values.destinationAccountId);
-        const isOriginInvestment = typeof finalAccountId === 'string' && investments.some(inv => inv.id === finalAccountId);
+        const isDestinationInvestment =
+          typeof values.destinationAccountId === "string" &&
+          investments.some((inv) => inv.id === values.destinationAccountId);
+        const isOriginInvestment =
+          typeof finalAccountId === "string" &&
+          investments.some((inv) => inv.id === finalAccountId);
 
         let finalPaymentMethod = values.paymentMethod;
-        let finalDestAccountId = undefined;
+        let finalDestAccountId;
         let finalOriginAccountId = finalAccountId || "";
-        let finalInvestmentId = undefined;
+        let finalInvestmentId;
 
         if (values.type === "TRANSFER") {
           finalPaymentMethod = "TRANSFER";
@@ -239,7 +253,7 @@ export function TransactionDialog({
           result = await createTransaction(txData);
         }
 
-        if (result && result.error) {
+        if (result?.error) {
           toast.error(result.error);
           return;
         }
@@ -279,7 +293,7 @@ export function TransactionDialog({
         )}
       </DialogTrigger>
 
-      <DialogContent className="p-0 gap-0 sm:max-w-[460px] border-white/5 bg-zinc-950 text-zinc-200 overflow-hidden shadow-2xl">
+      <DialogContent className="p-0 gap-0 sm:max-w-115 border-white/5 bg-zinc-950 text-zinc-200 overflow-hidden shadow-2xl">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -302,7 +316,11 @@ export function TransactionDialog({
                 {type === "TRANSFER" && <Repeat className="w-4 h-4" />}
               </div>
               <DialogTitle className="text-xs font-bold uppercase tracking-widest text-zinc-400">
-                {isEditing ? `Editar Lançamento` : (type === "TRANSFER" ? "Transferência" : "Novo Lançamento")}
+                {isEditing
+                  ? `Editar Lançamento`
+                  : type === "TRANSFER"
+                    ? "Transferência"
+                    : "Novo Lançamento"}
               </DialogTitle>
             </div>
 
@@ -446,7 +464,10 @@ export function TransactionDialog({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-zinc-900 border-white/10">
-                            <SelectItem value="none" className="text-zinc-500 italic">
+                            <SelectItem
+                              value="none"
+                              className="text-zinc-500 italic"
+                            >
                               Nenhuma
                             </SelectItem>
                             {categories.map((c) => (
@@ -485,23 +506,31 @@ export function TransactionDialog({
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
                               <SelectGroup>
-                                <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Conta Corrente</SelectLabel>
-                                {accounts.map((acc: { id: string; name: string }) => (
-                                  <SelectItem key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                  </SelectItem>
-                                ))}
+                                <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">
+                                  Conta Corrente
+                                </SelectLabel>
+                                {accounts.map(
+                                  (acc: { id: string; name: string }) => (
+                                    <SelectItem key={acc.id} value={acc.id}>
+                                      {acc.name}
+                                    </SelectItem>
+                                  ),
+                                )}
                               </SelectGroup>
                               {investments && investments.length > 0 && (
                                 <>
                                   <SelectSeparator className="bg-white/10 my-1" />
                                   <SelectGroup>
-                                    <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Caixinhas & Investimentos</SelectLabel>
-                                    {investments.map((inv: { id: string; name: string }) => (
-                                      <SelectItem key={inv.id} value={inv.id}>
-                                        {inv.name}
-                                      </SelectItem>
-                                    ))}
+                                    <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">
+                                      Caixinhas & Investimentos
+                                    </SelectLabel>
+                                    {investments.map(
+                                      (inv: { id: string; name: string }) => (
+                                        <SelectItem key={inv.id} value={inv.id}>
+                                          {inv.name}
+                                        </SelectItem>
+                                      ),
+                                    )}
                                   </SelectGroup>
                                 </>
                               )}
@@ -530,23 +559,31 @@ export function TransactionDialog({
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
                               <SelectGroup>
-                                <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Conta Corrente</SelectLabel>
-                                {accounts.map((acc: { id: string; name: string }) => (
-                                  <SelectItem key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                  </SelectItem>
-                                ))}
+                                <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">
+                                  Conta Corrente
+                                </SelectLabel>
+                                {accounts.map(
+                                  (acc: { id: string; name: string }) => (
+                                    <SelectItem key={acc.id} value={acc.id}>
+                                      {acc.name}
+                                    </SelectItem>
+                                  ),
+                                )}
                               </SelectGroup>
                               {investments && investments.length > 0 && (
                                 <>
                                   <SelectSeparator className="bg-white/10 my-1" />
                                   <SelectGroup>
-                                    <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">Caixinhas & Investimentos</SelectLabel>
-                                    {investments.map((inv: { id: string; name: string }) => (
-                                      <SelectItem key={inv.id} value={inv.id}>
-                                        {inv.name}
-                                      </SelectItem>
-                                    ))}
+                                    <SelectLabel className="text-zinc-500 text-[10px] uppercase font-bold px-2 py-1">
+                                      Caixinhas & Investimentos
+                                    </SelectLabel>
+                                    {investments.map(
+                                      (inv: { id: string; name: string }) => (
+                                        <SelectItem key={inv.id} value={inv.id}>
+                                          {inv.name}
+                                        </SelectItem>
+                                      ),
+                                    )}
                                   </SelectGroup>
                                 </>
                               )}
@@ -608,16 +645,20 @@ export function TransactionDialog({
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
                               {paymentMethod === "CREDIT_CARD"
-                                ? creditCards.map((card: { id: string; name: string }) => (
-                                  <SelectItem key={card.id} value={card.id}>
-                                    {card.name}
-                                  </SelectItem>
-                                ))
-                                : accounts.map((acc: { id: string; name: string }) => (
-                                  <SelectItem key={acc.id} value={acc.id}>
-                                    {acc.name}
-                                  </SelectItem>
-                                ))}
+                                ? creditCards.map(
+                                    (card: { id: string; name: string }) => (
+                                      <SelectItem key={card.id} value={card.id}>
+                                        {card.name}
+                                      </SelectItem>
+                                    ),
+                                  )
+                                : accounts.map(
+                                    (acc: { id: string; name: string }) => (
+                                      <SelectItem key={acc.id} value={acc.id}>
+                                        {acc.name}
+                                      </SelectItem>
+                                    ),
+                                  )}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -632,7 +673,12 @@ export function TransactionDialog({
                   control={form.control}
                   name="amount"
                   render={({ field }) => (
-                    <div className={cn("col-span-2", type !== "TRANSFER" && "sm:col-span-1")}>
+                    <div
+                      className={cn(
+                        "col-span-2",
+                        type !== "TRANSFER" && "sm:col-span-1",
+                      )}
+                    >
                       <CurrencyInput
                         label="Valor"
                         value={field.value as number}
@@ -666,7 +712,9 @@ export function TransactionDialog({
                             </FormControl>
                             <SelectContent className="bg-zinc-900 border-white/10">
                               <SelectItem value="A_VISTA">À vista</SelectItem>
-                              <SelectItem value="PARCELADO">Parcelado</SelectItem>
+                              <SelectItem value="PARCELADO">
+                                Parcelado
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -712,10 +760,12 @@ export function TransactionDialog({
                         checked={field.value}
                         onCheckedChange={field.onChange}
                         className={cn(
-                          field.value && (
-                            type === "EXPENSE" ? "!bg-red-500" :
-                              type === "INCOME" ? "!bg-emerald-500" : "!bg-blue-500"
-                          )
+                          field.value &&
+                            (type === "EXPENSE"
+                              ? "!bg-red-500"
+                              : type === "INCOME"
+                                ? "!bg-emerald-500"
+                                : "!bg-blue-500"),
                         )}
                       />
                     </FormControl>

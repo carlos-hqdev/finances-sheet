@@ -43,7 +43,7 @@ export default function AdminLayoutWrapper({
       />
 
       <div className="flex-1 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-secondary scrollbar-track-transparent bg-background">
-        <div className="p-4 md:p-6 min-h-full flex flex-col gap-4 2xl:max-w-[1800px] 2xl:mx-auto w-full transition-all duration-300">
+        <div className="p-4 md:p-6 min-h-full flex flex-col gap-4 2xl:max-w-450 2xl:mx-auto w-full transition-all duration-300">
           <div className="flex-1 flex flex-col bg-card rounded-3xl border border-border shadow-sm">
             <Header
               toggleSidebar={toggleSidebar}

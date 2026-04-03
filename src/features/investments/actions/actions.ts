@@ -8,7 +8,7 @@ export async function processMonthlyYields() {
     },
     include: {
       lots: true,
-    }
+    },
   });
 
   for (const inv of investments) {

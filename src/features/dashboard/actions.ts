@@ -1,15 +1,17 @@
 "use server";
 
+import { parseISO } from "date-fns";
 import { prisma } from "@/shared/lib/db";
-import { Prisma } from "@prisma/client";
-import { startOfMonth, endOfMonth, parseISO, subMonths } from "date-fns";
 
-export async function getDashboardBalances(userId: string, referenceMonth?: string) {
+export async function getDashboardBalances(
+  userId: string,
+  _referenceMonth?: string,
+) {
   // Se houver um referenceMonth, idealmente deveríamos calcular o saldo retroativo.
   // Por ora, para manter a consistência com o schema atual (que não tem snapshots),
   // retornaremos o saldo atual, mas marcaremos no plano que saldo histórico exigiria
   // somar todas as transações desde o início dos tempos até o fim do mês solicitado.
-  
+
   const accounts = await prisma.account.findMany({
     where: { userId },
     select: {
@@ -30,17 +32,20 @@ export async function getDashboardBalances(userId: string, referenceMonth?: stri
     _sum: { balance: true },
     where: { userId, type: { not: "SAVINGS" } },
   });
-  
+
   const totalInvestments = investments._sum.balance?.toNumber() || 0;
 
   return { totalBalance, emergencyFund, totalInvestments };
 }
 
-export async function getPatrimonyBreakdown(userId: string, referenceMonth?: string) {
+export async function getPatrimonyBreakdown(
+  userId: string,
+  _referenceMonth?: string,
+) {
   const [accounts, investments] = await Promise.all([
     prisma.account.findMany({
       where: { userId },
-      select: { type: true, balance: true }
+      select: { type: true, balance: true },
     }),
     prisma.investment.groupBy({
       by: ["type"],
@@ -50,7 +55,7 @@ export async function getPatrimonyBreakdown(userId: string, referenceMonth?: str
   ]);
 
   const accountsTotal = accounts
-    .filter(a => a.type !== "SAVINGS")
+    .filter((a) => a.type !== "SAVINGS")
     .reduce((sum, a) => sum + a.balance.toNumber(), 0);
 
   const typeLabels: Record<string, string> = {
@@ -75,18 +80,20 @@ export async function getPatrimonyBreakdown(userId: string, referenceMonth?: str
 
   // Adiciona reserva de emergência vinda das accounts tipo SAVINGS se houver
   const savingsFromAccounts = accounts
-    .filter(a => a.type === "SAVINGS")
+    .filter((a) => a.type === "SAVINGS")
     .reduce((sum, a) => sum + a.balance.toNumber(), 0);
 
   if (savingsFromAccounts > 0) {
-    const existingSavings = investmentSlices.find(s => s.name === "Reserva de Emergência");
+    const existingSavings = investmentSlices.find(
+      (s) => s.name === "Reserva de Emergência",
+    );
     if (existingSavings) {
       existingSavings.value += savingsFromAccounts;
     } else {
       investmentSlices.push({
         name: "Reserva de Emergência",
         value: savingsFromAccounts,
-        color: typeColors.SAVINGS
+        color: typeColors.SAVINGS,
       });
     }
   }
@@ -97,9 +104,14 @@ export async function getPatrimonyBreakdown(userId: string, referenceMonth?: str
   ];
 }
 
-export async function getCurrentMonthTransactions(userId: string, referenceMonth?: string) {
+export async function getCurrentMonthTransactions(
+  userId: string,
+  referenceMonth?: string,
+) {
   const date = referenceMonth ? parseISO(`${referenceMonth}-01`) : new Date();
-  const ref = referenceMonth || `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  const ref =
+    referenceMonth ||
+    `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
   const transactions = await prisma.transaction.findMany({
     where: {
@@ -114,11 +126,11 @@ export async function getCurrentMonthTransactions(userId: string, referenceMonth
   });
 
   const incomes = transactions
-    .filter(t => t.type === "INCOME")
+    .filter((t) => t.type === "INCOME")
     .reduce((sum, t) => sum + t.amount.toNumber(), 0);
 
   const expenses = transactions
-    .filter(t => t.type === "EXPENSE")
+    .filter((t) => t.type === "EXPENSE")
     .reduce((sum, t) => sum + t.amount.toNumber(), 0);
 
   return { incomes, expenses };
@@ -146,16 +158,31 @@ export async function getYearlyComparison(userId: string) {
   });
 
   const months = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
   ];
 
   const comparisonData = months.map((monthName, index) => {
     const monthIndex = index; // 0-11
-    
-    const filter = (year: number, type: string) => 
+
+    const filter = (year: number, type: string) =>
       transactions
-        .filter(t => t.date.getFullYear() === year && t.date.getMonth() === monthIndex && t.type === type)
+        .filter(
+          (t) =>
+            t.date.getFullYear() === year &&
+            t.date.getMonth() === monthIndex &&
+            t.type === type,
+        )
         .reduce((sum, t) => sum + t.amount.toNumber(), 0);
 
     return {
@@ -186,7 +213,12 @@ export async function getAvailableMonths(userId: string) {
     .filter((m): m is string => !!m);
 }
 
-export async function getYearlyPeriodComparison(userId: string, targetYear: number, baseYear: number, type: "INCOME" | "EXPENSE") {
+export async function getYearlyPeriodComparison(
+  userId: string,
+  targetYear: number,
+  baseYear: number,
+  type: "INCOME" | "EXPENSE",
+) {
   const transactions = await prisma.transaction.findMany({
     where: {
       account: { userId },
@@ -202,7 +234,10 @@ export async function getYearlyPeriodComparison(userId: string, targetYear: numb
 
   const calculateSum = (year: number, months: number[]) => {
     return transactions
-      .filter(t => t.date.getFullYear() === year && months.includes(t.date.getMonth()))
+      .filter(
+        (t) =>
+          t.date.getFullYear() === year && months.includes(t.date.getMonth()),
+      )
       .reduce((sum, t) => sum + t.amount.toNumber(), 0);
   };
 
@@ -219,7 +254,7 @@ export async function getYearlyPeriodComparison(userId: string, targetYear: numb
     { label: "ANO", months: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
   ];
 
-  const data = periods.map(p => {
+  const data = periods.map((p) => {
     const finalVal = calculateSum(targetYear, p.months);
     const initialVal = calculateSum(baseYear, p.months);
     const result = finalVal - initialVal;

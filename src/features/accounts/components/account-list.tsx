@@ -28,10 +28,10 @@ export async function AccountList() {
             <TableHead className="px-6 py-3 text-muted-foreground">
               Tipo
             </TableHead>
-            <TableHead className="px-6 py-3 text-right text-muted-foreground w-[150px]">
+            <TableHead className="px-6 py-3 text-right text-muted-foreground w-37.5">
               Saldo
             </TableHead>
-            <TableHead className="px-6 py-3 w-[50px] text-center text-muted-foreground">
+            <TableHead className="px-6 py-3 w-12.5 text-center text-muted-foreground">
               <span className="sr-only">Ações</span>
             </TableHead>
           </TableRow>
@@ -63,13 +63,11 @@ export async function AccountList() {
                     variant="outline"
                     className="bg-muted text-muted-foreground border-border"
                   >
-                    {
-                      {
-                        CHECKING: "Conta Corrente",
-                        INVESTMENT: "Investimento / Caixinha",
-                        CASH: "Dinheiro Vivo",
-                      }[account.type] || account.type
-                    }
+                    {{
+                      CHECKING: "Conta Corrente",
+                      INVESTMENT: "Investimento / Caixinha",
+                      CASH: "Dinheiro Vivo",
+                    }[account.type] || account.type}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-6 py-4 text-right font-semibold text-foreground">

@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition, useEffect } from "react";
+import { Database } from "lucide-react"; // Or another appropriate icon
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
@@ -9,6 +10,7 @@ import {
   updateInvestment,
 } from "@/features/investments/actions/investment-actions";
 import { Button } from "@/shared/components/ui/button";
+import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import {
   Dialog,
   DialogContent,
@@ -32,10 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import { Switch } from "@/shared/components/ui/switch";
 import { cn } from "@/shared/lib/utils";
-import { Database } from "lucide-react"; // Or another appropriate icon
 
 const formSchema = z.object({
   name: z.string().min(2, "Obrigatório"),
@@ -45,7 +45,7 @@ const formSchema = z.object({
   isDailyYield: z.boolean().default(false).optional(),
   indexer: z.string().optional(),
   yieldRate: z.coerce.number().optional(),
-  targetAmount: z.coerce.number().optional()
+  targetAmount: z.coerce.number().optional(),
 });
 
 type InvestmentFormValues = z.infer<typeof formSchema>;
@@ -57,7 +57,12 @@ interface InvestmentDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function InvestmentDialog({ initialData, trigger, open: controlledOpen, onOpenChange: controlledOnOpenChange }: InvestmentDialogProps) {
+export function InvestmentDialog({
+  initialData,
+  trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: InvestmentDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -79,13 +84,24 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
     resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: initialData?.name || "",
-      type: initialData?.type as "SAVINGS" | "FIXED" | "VARIABLE" | "FIIS" | "CRYPTO" | "OTHER" || "SAVINGS",
+      type:
+        (initialData?.type as
+          | "SAVINGS"
+          | "FIXED"
+          | "VARIABLE"
+          | "FIIS"
+          | "CRYPTO"
+          | "OTHER") || "SAVINGS",
       institution: initialData?.institution || "",
       balance: initialData?.balance || 0,
       isDailyYield: initialData?.isDailyYield || false,
       indexer: initialData?.indexer || "",
-      yieldRate: initialData?.yieldRate ? Number(initialData.yieldRate) : undefined,
-      targetAmount: initialData?.targetAmount ? Number(initialData.targetAmount) : undefined,
+      yieldRate: initialData?.yieldRate
+        ? Number(initialData.yieldRate)
+        : undefined,
+      targetAmount: initialData?.targetAmount
+        ? Number(initialData.targetAmount)
+        : undefined,
     },
   });
 
@@ -100,8 +116,12 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
         balance: initialData?.balance || 0,
         isDailyYield: initialData?.isDailyYield || false,
         indexer: initialData?.indexer || "",
-        yieldRate: initialData?.yieldRate ? Number(initialData.yieldRate) : undefined,
-        targetAmount: initialData?.targetAmount ? Number(initialData.targetAmount) : undefined,
+        yieldRate: initialData?.yieldRate
+          ? Number(initialData.yieldRate)
+          : undefined,
+        targetAmount: initialData?.targetAmount
+          ? Number(initialData.targetAmount)
+          : undefined,
       });
     } else {
       const timeoutId = setTimeout(() => {
@@ -125,7 +145,10 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
       try {
         const payload = {
           ...values,
-          indexer: (values.type === "FIXED" || values.type === "SAVINGS") ? values.indexer : null,
+          indexer:
+            values.type === "FIXED" || values.type === "SAVINGS"
+              ? values.indexer
+              : null,
           balance: !isEditing && values.type === "SAVINGS" ? 0 : values.balance,
         };
 
@@ -156,7 +179,7 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
           )}
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Editar Investimento" : "Novo Investimento"}
@@ -185,19 +208,34 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o tipo" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="SAVINGS">Reserva / Caixinha</SelectItem>
-                        <SelectItem value="FIXED" disabled>Renda Fixa (Em breve)</SelectItem>
-                        <SelectItem value="VARIABLE" disabled>Ações BR (Em breve)</SelectItem>
-                        <SelectItem value="FIIS" disabled>FIIs (Em breve)</SelectItem>
-                        <SelectItem value="CRYPTO" disabled>Cripto (Em breve)</SelectItem>
-                        <SelectItem value="OTHER" disabled>Outros (Em breve)</SelectItem>
+                        <SelectItem value="SAVINGS">
+                          Reserva / Caixinha
+                        </SelectItem>
+                        <SelectItem value="FIXED" disabled>
+                          Renda Fixa (Em breve)
+                        </SelectItem>
+                        <SelectItem value="VARIABLE" disabled>
+                          Ações BR (Em breve)
+                        </SelectItem>
+                        <SelectItem value="FIIS" disabled>
+                          FIIs (Em breve)
+                        </SelectItem>
+                        <SelectItem value="CRYPTO" disabled>
+                          Cripto (Em breve)
+                        </SelectItem>
+                        <SelectItem value="OTHER" disabled>
+                          Outros (Em breve)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -211,7 +249,11 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                   <FormItem>
                     <FormLabel>Instituição</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: Nubank" {...field} value={field.value || ""} />
+                      <Input
+                        placeholder="Ex: Nubank"
+                        {...field}
+                        value={field.value || ""}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -255,7 +297,12 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                       <FormItem>
                         <FormLabel>Taxa (%)</FormLabel>
                         <FormControl>
-                          <Input type="number" step="0.01" {...field} value={field.value || ""} />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -268,7 +315,10 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Indexador</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Selecione" />
@@ -289,13 +339,16 @@ export function InvestmentDialog({ initialData, trigger, open: controlledOpen, o
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-
                   <FormField
                     control={form.control}
                     name="isDailyYield"
                     render={({ field }) => (
                       <FormItem className="flex items-center justify-between shrink-0 space-y-0 h-full mt-2">
-                        <FormLabel className="text-xs">Rendimento<br />Diário?</FormLabel>
+                        <FormLabel className="text-xs">
+                          Rendimento
+                          <br />
+                          Diário?
+                        </FormLabel>
                         <FormControl className="h-full mt-0">
                           <Switch
                             checked={field.value}

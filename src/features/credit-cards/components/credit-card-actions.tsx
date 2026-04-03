@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+import { useState, useTransition } from "react";
+import { deleteCreditCard } from "@/features/credit-cards/actions/card-actions";
 
 import {
   AlertDialog,
@@ -24,7 +16,14 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 
 import { Button } from "@/shared/components/ui/button";
-import { deleteCreditCard } from "@/features/credit-cards/actions/card-actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { CreditCardDialog } from "./credit-card-dialog";
 
 interface CreditCardActionsProps {
@@ -32,7 +31,10 @@ interface CreditCardActionsProps {
   accounts: { id: string; name: string }[];
 }
 
-export function CreditCardActions({ creditCard, accounts }: CreditCardActionsProps) {
+export function CreditCardActions({
+  creditCard,
+  accounts,
+}: CreditCardActionsProps) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 

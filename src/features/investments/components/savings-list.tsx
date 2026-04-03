@@ -1,18 +1,30 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  ArrowRight,
+  Landmark,
+  MoreVertical,
+  Pencil,
+  PiggyBank,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
-import { formatCurrency } from "@/shared/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Progress } from "@/shared/components/ui/progress";
-import { Landmark, PiggyBank, MoreVertical, Pencil, Trash2, ArrowRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { Button } from "@/shared/components/ui/button";
+import { Progress } from "@/shared/components/ui/progress";
+import { formatCurrency } from "@/shared/lib/utils";
 import { InvestmentDialog } from "./investment-dialog";
 
 // Types based on the Prisma schema
@@ -34,18 +46,23 @@ interface SavingsListProps {
 }
 
 export function SavingsList({ investments }: SavingsListProps) {
-  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(
+    null,
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const groupedSavings = useMemo(() => {
-    return investments.reduce((acc, investment) => {
-      const institution = investment.institution || "Outros";
-      if (!acc[institution]) {
-        acc[institution] = [];
-      }
-      acc[institution].push(investment);
-      return acc;
-    }, {} as Record<string, Investment[]>);
+    return investments.reduce(
+      (acc, investment) => {
+        const institution = investment.institution || "Outros";
+        if (!acc[institution]) {
+          acc[institution] = [];
+        }
+        acc[institution].push(investment);
+        return acc;
+      },
+      {} as Record<string, Investment[]>,
+    );
   }, [investments]);
 
   if (Object.keys(groupedSavings).length === 0) {
@@ -66,18 +83,26 @@ export function SavingsList({ investments }: SavingsListProps) {
           <div key={institution} className="space-y-4">
             <div className="flex items-center gap-2">
               <Landmark className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold tracking-tight">{institution}</h3>
+              <h3 className="text-lg font-semibold tracking-tight">
+                {institution}
+              </h3>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {savings.map((saving) => {
                 let progressPercentage = 0;
                 if (saving.targetAmount && saving.targetAmount > 0) {
-                  progressPercentage = Math.min(100, Math.max(0, (saving.balance / saving.targetAmount) * 100));
+                  progressPercentage = Math.min(
+                    100,
+                    Math.max(0, (saving.balance / saving.targetAmount) * 100),
+                  );
                 }
 
                 return (
-                  <Card key={saving.id} className="relative overflow-hidden transition-all hover:shadow-md flex flex-col group">
+                  <Card
+                    key={saving.id}
+                    className="relative overflow-hidden transition-all hover:shadow-md flex flex-col group"
+                  >
                     <div className="absolute top-3 right-3 z-10">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -113,16 +138,24 @@ export function SavingsList({ investments }: SavingsListProps) {
                       </DropdownMenu>
                     </div>
 
-                    <Link href={`/investments/${saving.id}`} className="flex-1 flex flex-col">
+                    <Link
+                      href={`/investments/${saving.id}`}
+                      className="flex-1 flex flex-col"
+                    >
                       <CardHeader className="p-4 pb-2 pr-12">
                         <CardTitle className="text-base flex justify-between items-center pr-2">
                           <div className="flex items-center gap-2 truncate">
                             <span className="truncate">{saving.name}</span>
-                            {(saving.type === "FIXED" || saving.type === "SAVINGS") && saving.indexer && saving.indexer !== "OTHER" && (
-                              <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm shrink-0">
-                                {saving.indexer === "PREFIXED" ? "PRÉ" : saving.indexer}
-                              </span>
-                            )}
+                            {(saving.type === "FIXED" ||
+                              saving.type === "SAVINGS") &&
+                              saving.indexer &&
+                              saving.indexer !== "OTHER" && (
+                                <span className="text-[10px] uppercase font-bold tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm shrink-0">
+                                  {saving.indexer === "PREFIXED"
+                                    ? "PRÉ"
+                                    : saving.indexer}
+                                </span>
+                              )}
                           </div>
                           <PiggyBank className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         </CardTitle>
@@ -141,10 +174,15 @@ export function SavingsList({ investments }: SavingsListProps) {
                                 <span>Progresso</span>
                                 <span>{Math.round(progressPercentage)}%</span>
                               </div>
-                              <Progress value={progressPercentage} className="h-2" />
+                              <Progress
+                                value={progressPercentage}
+                                className="h-2"
+                              />
                               <div className="flex justify-between text-xs text-muted-foreground">
                                 <span>{formatCurrency(saving.balance)}</span>
-                                <span>Meta: {formatCurrency(saving.targetAmount)}</span>
+                                <span>
+                                  Meta: {formatCurrency(saving.targetAmount)}
+                                </span>
                               </div>
                             </div>
                           )}
@@ -174,14 +212,20 @@ export function SavingsList({ investments }: SavingsListProps) {
         initialData={
           editingInvestment
             ? {
-              ...editingInvestment,
-              type: editingInvestment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "FIIS" | "CRYPTO" | "OTHER",
-              institution: editingInvestment.institution ?? undefined,
-              targetAmount: editingInvestment.targetAmount ?? undefined,
-              indexer: editingInvestment.indexer ?? undefined,
-              yieldRate: editingInvestment.yieldRate ?? undefined,
-              isDailyYield: editingInvestment.isDailyYield ?? undefined,
-            }
+                ...editingInvestment,
+                type: editingInvestment.type as
+                  | "SAVINGS"
+                  | "FIXED"
+                  | "VARIABLE"
+                  | "FIIS"
+                  | "CRYPTO"
+                  | "OTHER",
+                institution: editingInvestment.institution ?? undefined,
+                targetAmount: editingInvestment.targetAmount ?? undefined,
+                indexer: editingInvestment.indexer ?? undefined,
+                yieldRate: editingInvestment.yieldRate ?? undefined,
+                isDailyYield: editingInvestment.isDailyYield ?? undefined,
+              }
             : undefined
         }
       />

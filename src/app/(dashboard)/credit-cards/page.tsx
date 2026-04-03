@@ -1,5 +1,4 @@
 import { CreditCardActions, CreditCardDialog } from "@/features/credit-cards";
-import { DashboardLayout } from "@/shared/components/layout";
 import { prisma } from "@/shared/lib/db";
 
 export default async function CreditCardsPage() {
@@ -26,7 +25,7 @@ export default async function CreditCardsPage() {
   }));
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
@@ -85,6 +84,6 @@ export default async function CreditCardsPage() {
           ))
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,8 +1,16 @@
 "use client";
 
-import { formatCurrency } from "@/shared/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -11,15 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { Badge } from "@/shared/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
-import { Button } from "@/shared/components/ui/button";
-import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import { formatCurrency } from "@/shared/lib/utils";
 
 interface InvestmentLot {
   id: string;
@@ -34,7 +34,10 @@ interface InvestmentLotTableProps {
   investmentId: string;
 }
 
-export function InvestmentLotTable({ lots, investmentId }: InvestmentLotTableProps) {
+export function InvestmentLotTable({
+  lots,
+  investmentId,
+}: InvestmentLotTableProps) {
   if (lots.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground border rounded-lg bg-card">
@@ -59,7 +62,9 @@ export function InvestmentLotTable({ lots, investmentId }: InvestmentLotTablePro
           {lots.map((lot) => (
             <TableRow key={lot.id}>
               <TableCell className="font-medium whitespace-nowrap">
-                {format(new Date(lot.date), "dd 'de' MMM, yyyy", { locale: ptBR })}
+                {format(new Date(lot.date), "dd 'de' MMM, yyyy", {
+                  locale: ptBR,
+                })}
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
                 {formatCurrency(lot.originalPrice)}

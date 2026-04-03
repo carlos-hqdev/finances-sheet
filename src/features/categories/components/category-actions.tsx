@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+import { useState, useTransition } from "react";
+import { deleteCategory } from "@/features/categories/actions/category-actions";
 
 import {
   AlertDialog,
@@ -24,7 +16,14 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 
 import { Button } from "@/shared/components/ui/button";
-import { deleteCategory } from "@/features/categories/actions/category-actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { CategoryDialog } from "./category-dialog";
 
 interface CategoryActionsProps {
@@ -101,7 +100,8 @@ export function CategoryActions({ category, userId }: CategoryActionsProps) {
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta ação não pode ser desfeita. Isso excluirá permanentemente a
-              categoria <strong>{category.name}</strong> e limpará ela das transações associadas.
+              categoria <strong>{category.name}</strong> e limpará ela das
+              transações associadas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

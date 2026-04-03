@@ -1,8 +1,8 @@
 "use client";
 
-import { Input } from "./input";
-import { FormControl, FormItem, FormLabel, FormMessage } from "./form";
 import { cn } from "@/shared/lib/utils";
+import { FormControl, FormItem, FormLabel, FormMessage } from "./form";
+import { Input } from "./input";
 
 interface CurrencyInputProps {
   label: string;
@@ -13,7 +13,14 @@ interface CurrencyInputProps {
   labelClassName?: string;
 }
 
-export function CurrencyInput({ label, value, onChange, placeholder, className, labelClassName }: CurrencyInputProps) {
+export function CurrencyInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+  className,
+  labelClassName,
+}: CurrencyInputProps) {
   const formatValue = (val: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",

@@ -30,7 +30,7 @@ export async function updateCategory(
     name: string;
     color?: string;
     userId: string;
-  }
+  },
 ) {
   try {
     await prisma.category.update({

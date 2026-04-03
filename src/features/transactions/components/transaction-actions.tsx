@@ -1,17 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
-
+import { useState, useTransition } from "react";
+import { deleteTransaction } from "@/features/transactions/actions/transaction-actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,11 +13,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-
 import { Button } from "@/shared/components/ui/button";
-import { deleteTransaction } from "@/features/transactions/actions/transaction-actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { TransactionDialog } from "./transaction-dialog";
-import { Prisma } from "@prisma/client";
 
 interface TransactionActionsProps {
   transaction: any; // We can type this better, but using any for simplicity right now
@@ -93,7 +89,8 @@ export function TransactionActions({
               amount: Number(transaction.amount),
               date: new Date(transaction.date),
               categoryId: transaction.categoryId || undefined,
-              destinationAccountId: transaction.destinationAccountId || undefined,
+              destinationAccountId:
+                transaction.destinationAccountId || undefined,
               investmentId: transaction.investmentId || undefined,
               creditCardId: transaction.creditCardId || undefined,
             }}
@@ -122,8 +119,8 @@ export function TransactionActions({
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta ação não pode ser desfeita. Isso excluirá permanentemente a
-              transação <strong>{transaction.description}</strong> e reverterá seu
-              Impacto no saldo das contas.
+              transação <strong>{transaction.description}</strong> e reverterá
+              seu Impacto no saldo das contas.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

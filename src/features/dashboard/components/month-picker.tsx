@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { CalendarDays } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
 import {
   Select,
   SelectContent,
@@ -9,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { CalendarDays } from "lucide-react";
 
 interface MonthPickerProps {
   availableMonths: string[];
@@ -17,12 +17,24 @@ interface MonthPickerProps {
 }
 
 const MONTH_NAMES: Record<string, string> = {
-  "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
-  "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
-  "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro",
+  "01": "Janeiro",
+  "02": "Fevereiro",
+  "03": "Março",
+  "04": "Abril",
+  "05": "Maio",
+  "06": "Junho",
+  "07": "Julho",
+  "08": "Agosto",
+  "09": "Setembro",
+  "10": "Outubro",
+  "11": "Novembro",
+  "12": "Dezembro",
 };
 
-export function DashboardMonthPicker({ availableMonths, currentMonth }: MonthPickerProps) {
+export function DashboardMonthPicker({
+  availableMonths,
+  currentMonth,
+}: MonthPickerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -49,21 +61,22 @@ export function DashboardMonthPicker({ availableMonths, currentMonth }: MonthPic
   const now = new Date();
   const currentRef = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const currentYear = now.getFullYear().toString();
-  
-  const currentYearMonths = availableMonths
-    .filter(m => m.startsWith(currentYear) && m !== currentRef);
+
+  const currentYearMonths = availableMonths.filter(
+    (m) => m.startsWith(currentYear) && m !== currentRef,
+  );
 
   return (
     <div className="flex items-center gap-2">
       <div className="bg-muted p-2 rounded-lg">
         <CalendarDays className="w-4 h-4 text-muted-foreground" />
       </div>
-      <Select 
-        defaultValue={currentMonth || "current"} 
+      <Select
+        defaultValue={currentMonth || "current"}
         onValueChange={handleMonthChange}
         disabled={isPending}
       >
-        <SelectTrigger className="w-[180px] bg-card border-border font-medium">
+        <SelectTrigger className="w-45 bg-card border-border font-medium">
           <SelectValue placeholder="Selecione o mês" />
         </SelectTrigger>
         <SelectContent>

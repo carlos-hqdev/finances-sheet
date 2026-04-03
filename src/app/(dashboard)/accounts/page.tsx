@@ -1,9 +1,8 @@
 import { AccountForm, AccountList } from "@/features/accounts";
-import { DashboardLayout } from "@/shared/components/layout";
 
 export default function AccountsPage() {
   return (
-    <DashboardLayout>
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
@@ -17,6 +16,6 @@ export default function AccountsPage() {
       </div>
 
       <AccountList />
-    </DashboardLayout>
+    </div>
   );
 }

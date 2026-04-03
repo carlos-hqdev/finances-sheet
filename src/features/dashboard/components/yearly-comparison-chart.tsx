@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import {
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
   Legend,
   ResponsiveContainer,
-  Cell,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 
@@ -84,7 +83,10 @@ function CustomTooltip({ active, payload, label }: any) {
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((entry: any) => (
         <div key={entry.name} className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+          <span
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
           <span className="text-muted-foreground">{entry.name}:</span>
           <span className="font-medium text-foreground">
             {formatBRL(entry.value)}
@@ -95,7 +97,10 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export function YearlyComparisonChart({ data, years }: YearlyComparisonChartProps) {
+export function YearlyComparisonChart({
+  data,
+  years,
+}: YearlyComparisonChartProps) {
   const [view, setView] = useState<"income" | "expense">("income");
 
   const chartData = data.map((d) => ({
@@ -121,9 +126,12 @@ export function YearlyComparisonChart({ data, years }: YearlyComparisonChartProp
         </Tabs>
       </div>
 
-      <div className="flex-1 min-h-[250px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+      <div className="flex-1 min-h-62.5">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <BarChart
+            data={chartData}
+            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+          >
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="currentColor"
@@ -142,14 +150,16 @@ export function YearlyComparisonChart({ data, years }: YearlyComparisonChartProp
               tickLine={false}
               width={65}
             />
-            <Tooltip 
-              content={<CustomTooltip />} 
+            <Tooltip
+              content={<CustomTooltip />}
               cursor={{ fill: "currentColor", opacity: 0.05 }}
             />
             <Legend
               formatter={(value) => (
                 <span className="text-muted-foreground text-xs">
-                  {value === "current" ? `Este Ano (${years.current})` : `Ano Anterior (${years.previous})`}
+                  {value === "current"
+                    ? `Este Ano (${years.current})`
+                    : `Ano Anterior (${years.previous})`}
                 </span>
               )}
             />

@@ -1,17 +1,17 @@
 "use client";
 
+import { useMemo } from "react";
 import {
-  ComposedChart,
   Bar,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
   Line,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
-import { useMemo } from "react";
 
 type MonthData = {
   month: string;
@@ -26,9 +26,18 @@ interface CashFlowChartProps {
 }
 
 const MONTH_LABELS: Record<string, string> = {
-  "01": "Jan", "02": "Fev", "03": "Mar", "04": "Abr",
-  "05": "Mai", "06": "Jun", "07": "Jul", "08": "Ago",
-  "09": "Set", "10": "Out", "11": "Nov", "12": "Dez",
+  "01": "Jan",
+  "02": "Fev",
+  "03": "Mar",
+  "04": "Abr",
+  "05": "Mai",
+  "06": "Jun",
+  "07": "Jul",
+  "08": "Ago",
+  "09": "Set",
+  "10": "Out",
+  "11": "Nov",
+  "12": "Dez",
 };
 
 function formatBRL(value: number) {
@@ -87,7 +96,10 @@ function CustomTooltip({ active, payload, label }: any) {
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((entry: any) => (
         <div key={entry.name} className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+          <span
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
           <span className="text-muted-foreground">{entry.name}:</span>
           <span className="font-medium" style={{ color: entry.color }}>
             {formatBRL(entry.value)}
@@ -109,7 +121,7 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
           label: `${MONTH_LABELS[month] ?? month}/${year?.slice(2)}`,
         };
       }),
-    [data]
+    [data],
   );
 
   // Stats
@@ -118,7 +130,7 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
   const totalExpense = chartData.reduce((s, d) => s + d.expense, 0);
   const maxIncomeMonth = chartData.reduce(
     (best, d) => (d.income > best.income ? d : best),
-    chartData[0] ?? { income: 0, label: "-" }
+    chartData[0] ?? { income: 0, label: "-" },
   );
   const resultAccumulated = totalIncome - totalExpense;
 
@@ -150,9 +162,12 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="flex-1 min-h-[220px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+      <div className="flex-1 min-h-55">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <ComposedChart
+            data={chartData}
+            margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
+          >
             {/* stroke com opacidade neutra — funciona nos dois temas */}
             <CartesianGrid
               strokeDasharray="3 3"
@@ -172,8 +187,8 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
               tickLine={false}
               width={78}
             />
-            <Tooltip 
-              content={<CustomTooltip />} 
+            <Tooltip
+              content={<CustomTooltip />}
               cursor={{ fill: "currentColor", opacity: 0.05 }}
             />
             <Legend
@@ -181,8 +196,20 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
                 <span className="text-muted-foreground text-xs">{value}</span>
               )}
             />
-            <Bar dataKey="income" name="Receita" fill="#22c55e" radius={[4, 4, 0, 0]} maxBarSize={28} />
-            <Bar dataKey="expense" name="Despesa" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={28} />
+            <Bar
+              dataKey="income"
+              name="Receita"
+              fill="#22c55e"
+              radius={[4, 4, 0, 0]}
+              maxBarSize={28}
+            />
+            <Bar
+              dataKey="expense"
+              name="Despesa"
+              fill="#ef4444"
+              radius={[4, 4, 0, 0]}
+              maxBarSize={28}
+            />
             <Line
               type="monotone"
               dataKey="result"
@@ -213,7 +240,9 @@ function StatBadge({
   return (
     <div className="bg-muted/50 rounded-lg px-3 py-2">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={`text-sm font-semibold ${color ?? "text-foreground"}`}>{value}</p>
+      <p className={`text-sm font-semibold ${color ?? "text-foreground"}`}>
+        {value}
+      </p>
       {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
     </div>
   );

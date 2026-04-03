@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/db";
-import { getFinanceReferenceMonth } from "@/shared/lib/finance-utils";
-import { differenceInDays, startOfDay } from "date-fns";
 
 // Protect this route in production using a secret token
 // Ex: https://your-domain.com/api/cron/daily-yield?token=YOUR_SUPER_SECRET_TOKEN
@@ -19,7 +17,7 @@ export async function GET(request: Request) {
   try {
     // 1. Fetch all accounts that have daily yield enabled and a valid yield rate
     const investments = await prisma.investment.findMany({
-      where: { 
+      where: {
         isDailyYield: true,
         yieldRate: { not: null },
       },
@@ -47,7 +45,7 @@ export async function GET(request: Request) {
       if (daysPassed <= 0) continue;
 
       // Yield calculation (simplified)
-      // yieldRate is typically annual (e.g., 10%). 
+      // yieldRate is typically annual (e.g., 10%).
       // Monthly: (1 + annualRate)^(1/12) - 1
       // To get the actual decimal: yieldRate / 100
       // Daily multiplier = (yieldRate / 100) / 365
@@ -55,14 +53,14 @@ export async function GET(request: Request) {
       // Compound interest formula: A = P(1 + r/n)^(nt)
       // Since it's daily, n=1, t=daysPassed, r = dailyRate
       const dailyRate = annualRateDecimal / 365;
-      const compoundFactor = Math.pow(1 + dailyRate, daysPassed);
-      
+      const compoundFactor = (1 + dailyRate) ** daysPassed;
+
       const previousBalance = investment.balance.toNumber();
       const rawYieldAmount = previousBalance * (compoundFactor - 1);
-      
+
       // Let's cap precision to 2 decimal places to avoid tiny fractions preventing updates
-      const yieldAmount = Number(rawYieldAmount.toFixed(4)); 
-      
+      const yieldAmount = Number(rawYieldAmount.toFixed(4));
+
       if (yieldAmount <= 0.005) {
         continue; // Too small to register as a cent
       }
@@ -72,13 +70,13 @@ export async function GET(request: Request) {
         // Since it's an investment now, it's not a regular account transaction.
         // For now, we update the investment balance directly.
         // Or generate a history record.
-        
+
         await tx.investmentHistory.create({
           data: {
             investmentId: investment.id,
             balance: previousBalance + yieldAmount,
-            date: new Date()
-          }
+            date: new Date(),
+          },
         });
 
         // Update Investment balance and timestamp
@@ -102,7 +100,7 @@ export async function GET(request: Request) {
     console.error("Error processing daily yields:", error);
     return NextResponse.json(
       { error: "Failed to process daily yields." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
