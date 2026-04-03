@@ -4,7 +4,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import {
+  createAccount,
+  updateAccount,
+} from "@/features/accounts/actions/account-actions";
 import { Button } from "@/shared/components/ui/button";
+import { CurrencyInput } from "@/shared/components/ui/currency-input";
+// Alterado de Sheet para Dialog
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -21,25 +35,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { CurrencyInput } from "@/shared/components/ui/currency-input";
-import { cn } from "@/shared/lib/utils";
-// Alterado de Sheet para Dialog
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/components/ui/dialog";
-import { createAccount, updateAccount } from "@/features/accounts/actions/account-actions";
 import {
   type AccountFormValues,
   accountSchema,
 } from "../schemas/account-schema";
 
 interface AccountDialogProps {
-  initialData?: AccountFormValues & { id: string; userId: string; createdAt: Date; updatedAt: Date };
+  initialData?: AccountFormValues & {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
   trigger?: React.ReactNode;
 }
 
@@ -87,8 +94,8 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      {/* sm:max-w-[425px] define uma largura agradável para diálogos */}
-      <DialogContent className="sm:max-w-[425px]">
+      {/* sm:max-w-106.25 define uma largura agradável para diálogos (425px) */}
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Editar Conta" : "Nova Conta"}</DialogTitle>
           <DialogDescription>
@@ -99,7 +106,10 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 pt-4"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -169,9 +179,12 @@ export function AccountForm({ initialData, trigger }: AccountDialogProps) {
               )}
             />
 
-
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Salvando..." : isEditing ? "Salvar Alterações" : "Criar Conta"}
+              {isPending
+                ? "Salvando..."
+                : isEditing
+                  ? "Salvar Alterações"
+                  : "Criar Conta"}
             </Button>
           </form>
         </Form>

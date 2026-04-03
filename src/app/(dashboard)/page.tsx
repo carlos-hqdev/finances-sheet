@@ -14,7 +14,6 @@ import {
   SummaryCard,
   YearlyComparisonChart,
 } from "@/features/dashboard";
-import { AdminLayoutWrapper as DashboardLayout } from "@/shared/components/layout";
 
 interface PageProps {
   searchParams: Promise<{
@@ -31,9 +30,11 @@ export default async function Home({ searchParams }: PageProps) {
 
   const selectedMonth = params.month;
   const targetYear = params.targetYear
-    ? parseInt(params.targetYear)
+    ? parseInt(params.targetYear, 10)
     : new Date().getFullYear();
-  const baseYear = params.baseYear ? parseInt(params.baseYear) : targetYear - 1;
+  const baseYear = params.baseYear
+    ? parseInt(params.baseYear, 10)
+    : targetYear - 1;
   const analysisType = params.type || "INCOME";
 
   const [
@@ -61,7 +62,7 @@ export default async function Home({ searchParams }: PageProps) {
     }).format(value);
 
   return (
-    <DashboardLayout>
+    <>
       {/* Header com Seletor de Mês */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
@@ -97,14 +98,14 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Bento Grid — Gráficos Principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div className="md:col-span-2 bg-card rounded-xl border border-border p-6 flex flex-col min-h-[380px]">
+        <div className="md:col-span-2 bg-card rounded-xl border border-border p-6 flex flex-col min-h-95">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Fluxo de Caixa
           </h3>
           <CashFlowChart data={cashFlowData} />
         </div>
 
-        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-[380px]">
+        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-95">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Distribuição do Patrimônio
           </h3>
@@ -114,7 +115,7 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Comparativo Anual Simples */}
       <div className="grid grid-cols-1 gap-4 mt-4">
-        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-[400px]">
+        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-100">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Evolução Mensal (Comparativo Simples)
           </h3>
@@ -127,7 +128,7 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Análise por Períodos (Trimestres/Semestres) */}
       <div className="grid grid-cols-1 gap-4 mt-4">
-        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-[600px]">
+        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-150">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Análise por Períodos Agregados (Trimestres / Semestres)
           </h3>
@@ -139,6 +140,6 @@ export default async function Home({ searchParams }: PageProps) {
           />
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

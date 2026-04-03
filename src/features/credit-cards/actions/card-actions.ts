@@ -33,7 +33,7 @@ export async function updateCreditCard(
     limit: number;
     closingDay: number;
     dueDay: number;
-  }
+  },
 ) {
   try {
     await prisma.creditCard.update({

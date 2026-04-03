@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+import { useState, useTransition } from "react";
+import { deleteAccount } from "@/features/accounts/actions/account-actions";
 
 import {
   AlertDialog,
@@ -24,7 +16,14 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 
 import { Button } from "@/shared/components/ui/button";
-import { deleteAccount } from "@/features/accounts/actions/account-actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import { AccountForm } from "./account-form";
 
 interface AccountActionsProps {
@@ -114,7 +113,8 @@ export function AccountActions({ account }: AccountActionsProps) {
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta ação não pode ser desfeita. Isso excluirá permanentemente a
-              conta <strong>{account.name}</strong> e todos os dados associados a ela (pode gerar erro se houver transações e não houver cascade).
+              conta <strong>{account.name}</strong> e todos os dados associados
+              a ela (pode gerar erro se houver transações e não houver cascade).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

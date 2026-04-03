@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 type PatrimonySlice = {
   name: string;
@@ -33,12 +27,17 @@ function CustomTooltip({ active, payload }: any) {
   return (
     <div className="bg-card border border-border rounded-lg p-3 text-sm shadow-lg">
       <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d.payload.color }} />
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: d.payload.color }}
+        />
         <span className="font-medium text-foreground">{d.name}</span>
       </div>
       <p className="text-muted-foreground mt-1">
         {formatBRL(d.value)}{" "}
-        <span className="font-semibold text-foreground">({d.payload.pct}%)</span>
+        <span className="font-semibold text-foreground">
+          ({d.payload.pct}%)
+        </span>
       </p>
     </div>
   );
@@ -55,8 +54,8 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
   return (
     <div className="flex flex-col h-full gap-4">
       {/* Donut */}
-      <div className="flex-1 min-h-[180px]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="flex-1 min-h-45">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <PieChart>
             <Pie
               data={dataWithPct}
@@ -68,7 +67,11 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
               dataKey="value"
             >
               {dataWithPct.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color}
+                  stroke="transparent"
+                />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
@@ -82,7 +85,10 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
           Total: {formatBRL(total)}
         </p>
         {dataWithPct.map((d) => (
-          <div key={d.name} className="flex items-center justify-between text-sm">
+          <div
+            key={d.name}
+            className="flex items-center justify-between text-sm"
+          >
             <div className="flex items-center gap-2 min-w-0">
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -91,8 +97,12 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
               <span className="text-muted-foreground truncate">{d.name}</span>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-foreground font-medium">{formatBRL(d.value)}</span>
-              <span className="text-muted-foreground text-xs w-10 text-right">{d.pct}%</span>
+              <span className="text-foreground font-medium">
+                {formatBRL(d.value)}
+              </span>
+              <span className="text-muted-foreground text-xs w-10 text-right">
+                {d.pct}%
+              </span>
             </div>
           </div>
         ))}

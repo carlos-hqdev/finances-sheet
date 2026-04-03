@@ -25,7 +25,7 @@ export async function createInvestment(data: {
           name: "Demo User",
         },
       });
-    } catch (_e) { }
+    } catch (_e) {}
   }
 
   await prisma.investment.create({
@@ -47,7 +47,7 @@ export async function updateInvestment(
     isDailyYield?: boolean;
     targetAmount?: number;
     yieldRate?: number;
-  }
+  },
 ) {
   await prisma.investment.update({
     where: { id },

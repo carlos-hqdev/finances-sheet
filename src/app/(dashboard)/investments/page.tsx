@@ -1,6 +1,5 @@
 import { Lock } from "lucide-react";
 import { InvestmentDialog, SavingsList } from "@/features/investments";
-import { DashboardLayout } from "@/shared/components/layout";
 import { prisma } from "@/shared/lib/db";
 
 function FutureSection({
@@ -52,7 +51,7 @@ export default async function InvestmentsPage() {
   const activeInvestments = investments.filter((inv) => inv.type === "SAVINGS");
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
@@ -105,6 +104,6 @@ export default async function InvestmentsPage() {
           genericName="Outros Investimentos"
         />
       </div>
-    </DashboardLayout>
+    </>
   );
 }

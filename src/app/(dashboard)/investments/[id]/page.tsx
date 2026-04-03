@@ -15,7 +15,6 @@ import {
   InvestmentLotTable,
 } from "@/features/investments";
 import { TransactionDialog } from "@/features/transactions";
-import { DashboardLayout } from "@/shared/components/layout";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -128,8 +127,7 @@ export default async function InvestmentDetailPage({
   };
 
   return (
-    <DashboardLayout>
-      <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-6">
         <div className="mb-4">
           <Button
             variant="ghost"
@@ -338,7 +336,6 @@ export default async function InvestmentDetailPage({
             </CardContent>
           </Card>
         </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

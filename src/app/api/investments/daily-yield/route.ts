@@ -1,8 +1,8 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/shared/lib/db";
-import { Prisma } from "@prisma/client";
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const DAILY_MULTIPLIER = 1.0004;
 
@@ -18,13 +18,15 @@ export async function GET(request: Request) {
           },
           include: {
             transaction: true,
-          }
+          },
         },
       },
     });
 
     if (investments.length === 0) {
-      return NextResponse.json({ message: "Nenhum investimento elegível para rendimento diário." });
+      return NextResponse.json({
+        message: "Nenhum investimento elegível para rendimento diário.",
+      });
     }
 
     let updatedInvestmentsCount = 0;
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
           const currentBalanceDec = new Prisma.Decimal(lot.currentBalance);
           const newBalance = currentBalanceDec.mul(DAILY_MULTIPLIER);
           const profit = newBalance.minus(currentBalanceDec);
-          
+
           await tx.investmentLot.update({
             where: { id: lot.id },
             data: { currentBalance: newBalance },
@@ -48,14 +50,14 @@ export async function GET(request: Request) {
             await tx.transaction.create({
               data: {
                 amount: profit,
-                type: 'INCOME',
-                paymentMethod: 'OTHER',
+                type: "INCOME",
+                paymentMethod: "OTHER",
                 investmentId: investment.id,
                 accountId: lot.transaction.accountId,
-                description: 'Rendimento Diário',
+                description: "Rendimento Diário",
                 date: new Date(),
                 isPaid: true,
-              }
+              },
             });
           }
 
@@ -73,7 +75,7 @@ export async function GET(request: Request) {
             data: {
               investmentId: investment.id,
               balance: totalInvestmentBalance,
-            }
+            },
           });
 
           updatedInvestmentsCount++;
@@ -91,7 +93,7 @@ export async function GET(request: Request) {
     console.error("Erro ao processar rendimento diário:", error);
     return NextResponse.json(
       { error: "Ocorreu um erro ao processar os rendimentos" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

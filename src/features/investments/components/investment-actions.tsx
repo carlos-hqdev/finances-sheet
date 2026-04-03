@@ -1,5 +1,6 @@
 "use client";
 
+import type { Prisma } from "@prisma/client";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useTransition } from "react";
 import { deleteInvestment } from "@/features/investments/actions/investment-actions";
@@ -11,8 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-
-import { Prisma } from "@prisma/client";
 
 interface InvestmentActionsProps {
   investment: {
@@ -38,7 +37,13 @@ export function InvestmentActions({ investment }: InvestmentActionsProps) {
   // Converter tipos do prisma para compatibilidade com o form
   const formattedInvestment = {
     ...investment,
-    type: investment.type as "SAVINGS" | "FIXED" | "VARIABLE" | "FIIS" | "CRYPTO" | "OTHER",
+    type: investment.type as
+      | "SAVINGS"
+      | "FIXED"
+      | "VARIABLE"
+      | "FIIS"
+      | "CRYPTO"
+      | "OTHER",
     balance: Number(investment.balance),
     institution: investment.institution || undefined,
   };

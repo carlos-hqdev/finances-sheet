@@ -1,9 +1,9 @@
 "use client";
 
+import { Settings2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { InvestmentDialog } from "./investment-dialog";
-import { Settings2, Trash2 } from "lucide-react";
 
 interface InvestmentDetailActionsProps {
   investment: {
@@ -20,7 +20,9 @@ interface InvestmentDetailActionsProps {
   };
 }
 
-export function InvestmentDetailActions({ investment }: InvestmentDetailActionsProps) {
+export function InvestmentDetailActions({
+  investment,
+}: InvestmentDetailActionsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   // Assuming handleDelete and isDeleting are defined elsewhere or will be added
   const [isDeleting, setIsDeleting] = useState(false);

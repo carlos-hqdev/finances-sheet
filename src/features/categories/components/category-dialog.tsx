@@ -4,7 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createCategory, updateCategory } from "@/features/categories/actions/category-actions";
+import {
+  createCategory,
+  updateCategory,
+} from "@/features/categories/actions/category-actions";
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -36,7 +39,11 @@ interface CategoryDialogProps {
   trigger?: React.ReactNode;
 }
 
-export function CategoryDialog({ userId, initialData, trigger }: CategoryDialogProps) {
+export function CategoryDialog({
+  userId,
+  initialData,
+  trigger,
+}: CategoryDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isEditing = !!initialData;
@@ -76,9 +83,11 @@ export function CategoryDialog({ userId, initialData, trigger }: CategoryDialogP
       <DialogTrigger asChild>
         {trigger || <Button>Adicionar Categoria</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar Categoria" : "Nova Categoria"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Editar Categoria" : "Nova Categoria"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -123,7 +132,11 @@ export function CategoryDialog({ userId, initialData, trigger }: CategoryDialogP
             />
 
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Salvando..." : isEditing ? "Salvar Alterações" : "Salvar Categoria"}
+              {isPending
+                ? "Salvando..."
+                : isEditing
+                  ? "Salvar Alterações"
+                  : "Salvar Categoria"}
             </Button>
           </form>
         </Form>

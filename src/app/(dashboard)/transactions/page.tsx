@@ -5,7 +5,6 @@ import {
   TransactionDialog,
   TransactionIsPaidSwitch,
 } from "@/features/transactions";
-import { DashboardLayout } from "@/shared/components/layout";
 import { prisma } from "@/shared/lib/db";
 
 const PAYMENT_METHODS_MAP: Record<string, string> = {
@@ -71,7 +70,7 @@ export default async function TransactionsPage() {
   }));
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
@@ -100,7 +99,7 @@ export default async function TransactionsPage() {
               <th className="px-6 py-3">Método</th>
               <th className="px-6 py-3 text-right">Valor</th>
               <th className="px-6 py-3 text-center">Pago</th>
-              <th className="px-6 py-3 text-center w-[50px]">
+              <th className="px-6 py-3 text-center w-12.5">
                 <span className="sr-only">Ações</span>
               </th>
             </tr>
@@ -176,6 +175,6 @@ export default async function TransactionsPage() {
           </tbody>
         </table>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -26,19 +26,39 @@ async function main() {
 
   console.log("Criando categorias...");
   const catAlimentacao = await prisma.category.create({
-    data: { name: "Alimentação", userId: user.id, color: "#ef4444", icon: "Utensils" },
+    data: {
+      name: "Alimentação",
+      userId: user.id,
+      color: "#ef4444",
+      icon: "Utensils",
+    },
   });
   const catMoradia = await prisma.category.create({
     data: { name: "Moradia", userId: user.id, color: "#3b82f6", icon: "Home" },
   });
   const catTransporte = await prisma.category.create({
-    data: { name: "Transporte", userId: user.id, color: "#f59e0b", icon: "Car" },
+    data: {
+      name: "Transporte",
+      userId: user.id,
+      color: "#f59e0b",
+      icon: "Car",
+    },
   });
   const catLazer = await prisma.category.create({
-    data: { name: "Lazer", userId: user.id, color: "#8b5cf6", icon: "Gamepad2" },
+    data: {
+      name: "Lazer",
+      userId: user.id,
+      color: "#8b5cf6",
+      icon: "Gamepad2",
+    },
   });
   const catSalario = await prisma.category.create({
-    data: { name: "Salário", userId: user.id, color: "#10b981", icon: "Briefcase" },
+    data: {
+      name: "Salário",
+      userId: user.id,
+      color: "#10b981",
+      icon: "Briefcase",
+    },
   });
 
   console.log("Criando Contas Correntes...");
@@ -92,7 +112,7 @@ async function main() {
       description: "Aporte Inicial Reserva",
       isPaid: true,
       referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
-    }
+    },
   });
   await prisma.investmentLot.create({
     data: {
@@ -102,7 +122,7 @@ async function main() {
       originalPrice: 5000,
       currentBalance: 5000,
       isFullyWithdrawn: false,
-    }
+    },
   });
 
   // 2. FIXED
@@ -129,7 +149,7 @@ async function main() {
       description: "Aporte Inicial CDB",
       isPaid: true,
       referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
-    }
+    },
   });
   await prisma.investmentLot.create({
     data: {
@@ -139,7 +159,7 @@ async function main() {
       originalPrice: 15000,
       currentBalance: 15000,
       isFullyWithdrawn: false,
-    }
+    },
   });
 
   // 3. VARIABLE
@@ -163,7 +183,7 @@ async function main() {
       description: "Aporte Inicial Ações",
       isPaid: true,
       referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
-    }
+    },
   });
   await prisma.investmentLot.create({
     data: {
@@ -173,7 +193,7 @@ async function main() {
       originalPrice: 12500,
       currentBalance: 12500,
       isFullyWithdrawn: false,
-    }
+    },
   });
 
   // 4. CRYPTO
@@ -197,7 +217,7 @@ async function main() {
       description: "Aporte Inicial Crypto",
       isPaid: true,
       referenceMonth: `${dMinus2.getFullYear()}-${String(dMinus2.getMonth() + 1).padStart(2, "0")}`,
-    }
+    },
   });
   await prisma.investmentLot.create({
     data: {
@@ -207,7 +227,7 @@ async function main() {
       originalPrice: 8000,
       currentBalance: 8000,
       isFullyWithdrawn: false,
-    }
+    },
   });
 
   console.log("Criando Transações...");
@@ -341,7 +361,7 @@ async function main() {
 
   for (const t of transactionsData) {
     const createdTx = await prisma.transaction.create({ data: t });
-    
+
     if (t.investmentId) {
       await prisma.investmentLot.create({
         data: {
@@ -351,7 +371,7 @@ async function main() {
           originalPrice: t.amount,
           currentBalance: t.amount,
           isFullyWithdrawn: false,
-        }
+        },
       });
     }
   }

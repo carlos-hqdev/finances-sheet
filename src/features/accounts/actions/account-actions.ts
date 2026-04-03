@@ -61,8 +61,8 @@ export async function getAccounts() {
     where: { userId: MOCK_USER_ID },
     orderBy: { createdAt: "desc" },
   });
-  
-  return accounts.map(a => ({
+
+  return accounts.map((a) => ({
     ...a,
     balance: a.balance ? a.balance.toNumber() : 0,
   }));
@@ -103,6 +103,9 @@ export async function deleteAccount(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Failed to delete account:", error);
-    return { error: "Failed to delete account (verifique se existem transacoes vinculadas)" };
+    return {
+      error:
+        "Failed to delete account (verifique se existem transacoes vinculadas)",
+    };
   }
 }

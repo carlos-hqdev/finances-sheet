@@ -4,8 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createCreditCard, updateCreditCard } from "@/features/credit-cards/actions/card-actions";
+import {
+  createCreditCard,
+  updateCreditCard,
+} from "@/features/credit-cards/actions/card-actions";
 import { Button } from "@/shared/components/ui/button";
+import { CurrencyInput } from "@/shared/components/ui/currency-input";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { CurrencyInput } from "@/shared/components/ui/currency-input";
 
 const formSchema = z.object({
   accountId: z.string().min(1, "Conta é obrigatória"),
@@ -46,7 +49,11 @@ interface CreditCardDialogProps {
   trigger?: React.ReactNode;
 }
 
-export function CreditCardDialog({ accounts, initialData, trigger }: CreditCardDialogProps) {
+export function CreditCardDialog({
+  accounts,
+  initialData,
+  trigger,
+}: CreditCardDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const isEditing = !!initialData;
@@ -82,9 +89,11 @@ export function CreditCardDialog({ accounts, initialData, trigger }: CreditCardD
       <DialogTrigger asChild>
         {trigger || <Button>Adicionar Cartão</Button>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Editar Cartão de Crédito" : "Novo Cartão de Crédito"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Editar Cartão de Crédito" : "Novo Cartão de Crédito"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -171,7 +180,11 @@ export function CreditCardDialog({ accounts, initialData, trigger }: CreditCardD
             </div>
 
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Salvando..." : isEditing ? "Salvar Alterações" : "Salvar Cartão"}
+              {isPending
+                ? "Salvando..."
+                : isEditing
+                  ? "Salvar Alterações"
+                  : "Salvar Cartão"}
             </Button>
           </form>
         </Form>
