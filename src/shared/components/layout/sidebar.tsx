@@ -12,6 +12,18 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
+import { signOut } from "@/shared/lib/auth-client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { LogOut, User as UserIcon } from "lucide-react";
+
 
 interface NavItem {
   name: string;
@@ -71,8 +83,20 @@ export default function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
   // Handle potential null/undefined name
   const firstName = user?.name ? user.name.split(" ")[0] : "Usuário";
+
+  const handleSignOut = async () => {
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/sign-in");
+        },
+      },
+    });
+  };
 
   return (
     <div
@@ -147,34 +171,60 @@ export default function Sidebar({
       </nav>
 
       <div className="p-4 border-t border-sidebar-border">
-        <div
-          className={cn(
-            "block rounded-lg  border border-sidebar-border p-3 mb-2 transition-all hover:bg-sidebar-accent cursor-pointer",
-            isCollapsed ? "flex justify-center" : "",
-          )}
-        >
-          <div className="flex items-center gap-3">
-            {user?.name ? (
-              <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
-                {firstName.substring(0, 2).toUpperCase()}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div
+              className={cn(
+                "block rounded-lg  border border-sidebar-border p-3 mb-2 transition-all hover:bg-sidebar-accent cursor-pointer outline-none",
+                isCollapsed ? "flex justify-center" : "",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                {user?.name ? (
+                  <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
+                    {firstName.substring(0, 2).toUpperCase()}
+                  </div>
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
+                    U
+                  </div>
+                )}
+                {!isCollapsed && (
+                  <div className="flex-1 overflow-hidden">
+                    <p className="text-sm font-medium truncate text-sidebar-foreground">
+                      {user?.name || "Convidado"}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user?.email || "guest@example.com"}
+                    </p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
-                U
-              </div>
-            )}
-            {!isCollapsed && (
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium truncate text-sidebar-foreground">
-                  {user?.name || "Convidado"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user?.email || "guest@example.com"}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side={isCollapsed ? "right" : "top"}
+            align={isCollapsed ? "start" : "end"}
+            className="w-56"
+          >
+            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/settings" className="cursor-pointer flex items-center gap-2">
+                <UserIcon className="h-4 w-4" />
+                <span>Perfil</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sair</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

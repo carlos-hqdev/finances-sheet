@@ -2,9 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/shared/lib/db";
-
-// Mock User ID for now (Assuming single user or first user in future)
-const MOCK_USER_ID = "cm4nt3q2v0000abc123456789";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
 
 export async function createInvestment(data: {
   name: string;
@@ -15,23 +14,20 @@ export async function createInvestment(data: {
   targetAmount?: number;
   yieldRate?: number;
 }) {
-  let user = await prisma.user.findUnique({ where: { id: MOCK_USER_ID } });
-  if (!user) {
-    try {
-      user = await prisma.user.create({
-        data: {
-          id: MOCK_USER_ID,
-          email: "demo@user.com",
-          name: "Demo User",
-        },
-      });
-    } catch (_e) {}
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    throw new Error("Não autorizado");
   }
+
+  const userId = session.user.id;
 
   await prisma.investment.create({
     data: {
       ...data,
-      userId: MOCK_USER_ID,
+      userId: userId,
     },
   });
   revalidatePath("/investments");
@@ -49,26 +45,40 @@ export async function updateInvestment(
     yieldRate?: number;
   },
 ) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) throw new Error("Não autorizado");
+
   await prisma.investment.update({
-    where: { id },
+    where: { id, userId: session.user.id },
     data,
   });
   revalidatePath("/investments");
 }
 
 export async function deleteInvestment(id: string) {
-  // Verifique se precisa deletar o histórico primeiro (cascade no bd não definido, então manual via prisma)
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) throw new Error("Não autorizado");
+
+  const userId = session.user.id;
+
+  // Verifique se precisa deletar o histórico primeiro
   await prisma.investmentHistory.deleteMany({
-    where: { investmentId: id },
+    where: { investmentId: id, investment: { userId } },
   });
 
   // Deletar os lotes primeiro
   await prisma.investmentLot.deleteMany({
-    where: { investmentId: id },
+    where: { investmentId: id, investment: { userId } },
   });
 
   await prisma.investment.delete({
-    where: { id },
+    where: { id, userId },
   });
   revalidatePath("/investments");
 }

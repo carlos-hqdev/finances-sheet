@@ -12,7 +12,7 @@ export async function getDashboardBalances(
   // retornaremos o saldo atual, mas marcaremos no plano que saldo histórico exigiria
   // somar todas as transações desde o início dos tempos até o fim do mês solicitado.
 
-  const accounts = await prisma.account.findMany({
+  const accounts = await prisma.bankAccount.findMany({
     where: { userId },
     select: {
       type: true,
@@ -43,7 +43,7 @@ export async function getPatrimonyBreakdown(
   _referenceMonth?: string,
 ) {
   const [accounts, investments] = await Promise.all([
-    prisma.account.findMany({
+    prisma.bankAccount.findMany({
       where: { userId },
       select: { type: true, balance: true },
     }),

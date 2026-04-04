@@ -3,6 +3,8 @@
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/shared/lib/db";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
 import { getFinanceReferenceMonth } from "@/shared/lib/finance-utils";
 
 export async function createTransaction(data: {
@@ -24,11 +26,26 @@ export async function createTransaction(data: {
     data.condition === "PARCELADO" ? "PARCELADO" : "A_VISTA"
   ) as "A_VISTA" | "PARCELADO";
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    throw new Error("Não autorizado");
+  }
+
+  const userId = session.user.id;
   const referenceMonth = getFinanceReferenceMonth(data.date, 25);
   const isPaid = data.isPaid ?? false;
 
   try {
     await prisma.$transaction(async (tx) => {
+      // 1. Validar que a conta pertence ao usuário
+      const account = await tx.bankAccount.findUnique({
+        where: { id: data.accountId, userId },
+      });
+      if (!account) throw new Error("Conta não encontrada ou não pertence ao usuário");
+
       let invoiceId: string | undefined;
 
       // Process Credit Card Invoice logic
@@ -105,7 +122,7 @@ export async function createTransaction(data: {
       if (isPaid) {
         if (data.type === "TRANSFER") {
           if (data.paymentMethod === "APPLICATION") {
-            await tx.account.update({
+            await tx.bankAccount.update({
               where: { id: data.accountId },
               data: { balance: { decrement: data.amount } },
             });
@@ -126,7 +143,7 @@ export async function createTransaction(data: {
               },
             });
           } else if (data.paymentMethod === "REDEMPTION") {
-            await tx.account.update({
+            await tx.bankAccount.update({
               where: { id: data.accountId }, // Destino do resgate
               data: { balance: { increment: data.amount } },
             });
@@ -185,12 +202,12 @@ export async function createTransaction(data: {
             });
           } else {
             // NORMAL TRANSFER
-            await tx.account.update({
+            await tx.bankAccount.update({
               where: { id: data.accountId },
               data: { balance: { decrement: data.amount } },
             });
             if (data.destinationAccountId) {
-              await tx.account.update({
+              await tx.bankAccount.update({
                 where: { id: data.destinationAccountId },
                 data: { balance: { increment: data.amount } },
               });
@@ -198,12 +215,12 @@ export async function createTransaction(data: {
           }
         } else if (data.paymentMethod !== "CREDIT_CARD") {
           if (data.type === "INCOME") {
-            await tx.account.update({
+            await tx.bankAccount.update({
               where: { id: data.accountId },
               data: { balance: { increment: data.amount } },
             });
           } else if (data.type === "EXPENSE") {
-            await tx.account.update({
+            await tx.bankAccount.update({
               where: { id: data.accountId },
               data: { balance: { decrement: data.amount } },
             });
@@ -248,7 +265,7 @@ async function revertTransactionImpacts(
         );
       }
 
-      await tx.account.update({
+      await tx.bankAccount.update({
         where: { id: oldTx.accountId },
         data: { balance: { increment: oldTx.amount } },
       });
@@ -267,7 +284,7 @@ async function revertTransactionImpacts(
         data: { balance: newGlobalBalance },
       });
     } else if (oldTx.paymentMethod === "REDEMPTION") {
-      await tx.account.update({
+      await tx.bankAccount.update({
         where: { id: oldTx.accountId },
         data: { balance: { decrement: oldTx.amount } },
       });
@@ -316,12 +333,12 @@ async function revertTransactionImpacts(
         data: { balance: newGlobalBalance },
       });
     } else {
-      await tx.account.update({
+      await tx.bankAccount.update({
         where: { id: oldTx.accountId },
         data: { balance: { increment: oldTx.amount } },
       });
       if (oldTx.destinationAccountId) {
-        await tx.account.update({
+        await tx.bankAccount.update({
           where: { id: oldTx.destinationAccountId },
           data: { balance: { decrement: oldTx.amount } },
         });
@@ -329,7 +346,7 @@ async function revertTransactionImpacts(
     }
   } else if (oldTx.paymentMethod !== "CREDIT_CARD") {
     const revertOp = oldTx.type === "INCOME" ? "decrement" : "increment";
-    await tx.account.update({
+    await tx.bankAccount.update({
       where: { id: oldTx.accountId },
       data: { balance: { [revertOp]: oldTx.amount } },
     });
@@ -355,7 +372,7 @@ async function applyTransactionImpacts(
 
   if (newTx.type === "TRANSFER") {
     if (newTx.paymentMethod === "APPLICATION") {
-      await tx.account.update({
+      await tx.bankAccount.update({
         where: { id: newTx.accountId },
         data: { balance: { decrement: newTx.amount } },
       });
@@ -373,7 +390,7 @@ async function applyTransactionImpacts(
         },
       });
     } else if (newTx.paymentMethod === "REDEMPTION") {
-      await tx.account.update({
+      await tx.bankAccount.update({
         where: { id: newTx.accountId },
         data: { balance: { increment: newTx.amount } },
       });
@@ -423,12 +440,12 @@ async function applyTransactionImpacts(
         data: { balance: newGlobalBalance },
       });
     } else {
-      await tx.account.update({
+      await tx.bankAccount.update({
         where: { id: newTx.accountId },
         data: { balance: { decrement: newTx.amount } },
       });
       if (newTx.destinationAccountId) {
-        await tx.account.update({
+        await tx.bankAccount.update({
           where: { id: newTx.destinationAccountId },
           data: { balance: { increment: newTx.amount } },
         });
@@ -436,7 +453,7 @@ async function applyTransactionImpacts(
     }
   } else if (newTx.paymentMethod !== "CREDIT_CARD") {
     const applyOp = newTx.type === "INCOME" ? "increment" : "decrement";
-    await tx.account.update({
+    await tx.bankAccount.update({
       where: { id: newTx.accountId },
       data: { balance: { [applyOp]: newTx.amount } },
     });
@@ -463,10 +480,33 @@ export async function updateTransaction(
   },
 ) {
   try {
-    const oldTx = await prisma.transaction.findUnique({ where: { id } });
-    if (!oldTx) return { error: "Transaction not found" };
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
+    const userId = session.user.id;
+
+    const oldTx = await prisma.transaction.findFirst({
+      where: {
+        id,
+        account: { userId },
+      },
+      include: { account: true },
+    });
+
+    if (!oldTx) return { error: "Transação não encontrada" };
 
     await prisma.$transaction(async (tx) => {
+      // Validar nova conta se mudou
+      if (data.accountId !== oldTx.accountId) {
+        const newAccount = await tx.bankAccount.findUnique({
+          where: { id: data.accountId, userId },
+        });
+        if (!newAccount) throw new Error("Nova conta não encontrada");
+      }
+
       // 1. Revert Old Transaction completely
       await revertTransactionImpacts(tx, oldTx);
 
@@ -574,9 +614,23 @@ export async function updateTransaction(
 
 export async function deleteTransaction(id: string) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
+    const userId = session.user.id;
+
     await prisma.$transaction(async (tx) => {
-      const oldTx = await tx.transaction.findUnique({ where: { id } });
-      if (!oldTx) throw new Error("Transaction not found");
+      const oldTx = await tx.transaction.findFirst({
+        where: {
+          id,
+          account: { userId },
+        },
+      });
+
+      if (!oldTx) throw new Error("Transação não encontrada");
 
       await revertTransactionImpacts(tx, oldTx);
       await tx.transaction.delete({ where: { id } });
@@ -598,9 +652,23 @@ export async function deleteTransaction(id: string) {
 
 export async function toggleTransactionIsPaid(id: string, isPaid: boolean) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
+    const userId = session.user.id;
+
     await prisma.$transaction(async (tx) => {
-      const oldTx = await tx.transaction.findUnique({ where: { id } });
-      if (!oldTx) throw new Error("Transaction not found");
+      const oldTx = await tx.transaction.findFirst({
+        where: {
+          id,
+          account: { userId },
+        },
+      });
+
+      if (!oldTx) throw new Error("Transação não encontrada");
 
       if (oldTx.isPaid === isPaid) return; // no-op
 

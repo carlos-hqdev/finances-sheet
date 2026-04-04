@@ -1,8 +1,13 @@
 "use server";
 
 import { prisma } from "@/shared/lib/db";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
 
-export async function getAggregatedTransactions(monthsHistory: number = 36) {
+export async function getAggregatedTransactions(
+  userId: string,
+  monthsHistory: number = 36,
+) {
   // Create a date limit (e.g., 36 months ago)
   const d = new Date();
   d.setMonth(d.getMonth() - monthsHistory);
@@ -10,6 +15,7 @@ export async function getAggregatedTransactions(monthsHistory: number = 36) {
 
   const transactions = await prisma.transaction.findMany({
     where: {
+      account: { userId },
       date: {
         gte: d,
       },

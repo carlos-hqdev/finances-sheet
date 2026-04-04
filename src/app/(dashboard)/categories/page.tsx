@@ -1,13 +1,24 @@
 import { CategoryActions, CategoryDialog } from "@/features/categories";
 import { prisma } from "@/shared/lib/db";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function CategoriesPage() {
-  const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
+  const session = await auth.api.getSession({
+    headers: await headers(),
   });
 
-  // Fetch the first user to assign categories to. Logic should be updated when auth is fully in place.
-  const user = await prisma.user.findFirst();
+  if (!session) {
+    return redirect("/sign-in");
+  }
+
+  const userId = session.user.id;
+
+  const categories = await prisma.category.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+  });
 
   return (
     <>
@@ -20,7 +31,7 @@ export default async function CategoriesPage() {
             Organize suas transações por categorias personalizadas.
           </p>
         </div>
-        {user && <CategoryDialog userId={user.id} />}
+        {userId && <CategoryDialog userId={userId} />}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -47,9 +58,9 @@ export default async function CategoriesPage() {
                 <h3 className="font-medium text-card-foreground">{cat.name}</h3>
               </div>
 
-              {user && (
+              {userId && (
                 <div className="ml-auto">
-                  <CategoryActions category={cat} userId={user.id} />
+                  <CategoryActions category={cat} userId={userId} />
                 </div>
               )}
             </div>

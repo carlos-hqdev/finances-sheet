@@ -57,7 +57,7 @@ export default async function InvestmentDetailPage({
 
   const [accountsRaw, categories, creditCardsRaw, investmentsListRaw] =
     await Promise.all([
-      prisma.account.findMany(),
+      prisma.bankAccount.findMany(),
       prisma.category.findMany(),
       prisma.creditCard.findMany(),
       prisma.investment.findMany(),

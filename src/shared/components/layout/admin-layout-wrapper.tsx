@@ -1,21 +1,25 @@
 "use client";
 
 import type { User } from "@prisma/client";
+import { useSession } from "@/shared/lib/auth-client";
 import { useState } from "react";
 import Header from "./header";
 import Sidebar from "./sidebar";
 
 interface AdminLayoutWrapperProps {
   children: React.ReactNode;
-  user?: User; // Make user optional for now as we might not have it initially
+  user?: User; 
 }
 
 export default function AdminLayoutWrapper({
   children,
-  user,
+  user: initialUser,
 }: AdminLayoutWrapperProps) {
+  const { data: session } = useSession();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const currentUser = (session?.user as User) ?? initialUser;
 
   const toggleSidebar = () => {
     if (window.innerWidth < 768) {
@@ -26,7 +30,7 @@ export default function AdminLayoutWrapper({
   };
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden font-sans">
+    <div className="flex h-full bg-background overflow-hidden font-sans">
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
@@ -36,7 +40,7 @@ export default function AdminLayoutWrapper({
       )}
 
       <Sidebar
-        user={user}
+        user={currentUser}
         isCollapsed={isSidebarCollapsed}
         isMobileMenuOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
@@ -48,7 +52,7 @@ export default function AdminLayoutWrapper({
             <Header
               toggleSidebar={toggleSidebar}
               isSidebarCollapsed={isSidebarCollapsed}
-              user={user}
+              user={currentUser}
             />
             <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
               {children}

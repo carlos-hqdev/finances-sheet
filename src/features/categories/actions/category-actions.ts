@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/shared/lib/db";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
 
 export async function createCategory(data: {
   name: string;
@@ -9,11 +11,17 @@ export async function createCategory(data: {
   userId: string;
 }) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
     await prisma.category.create({
       data: {
         name: data.name,
         color: data.color,
-        userId: data.userId,
+        userId: session.user.id,
       },
     });
     revalidatePath("/categories");
@@ -33,12 +41,17 @@ export async function updateCategory(
   },
 ) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
     await prisma.category.update({
-      where: { id },
+      where: { id, userId: session.user.id },
       data: {
         name: data.name,
         color: data.color,
-        userId: data.userId,
       },
     });
     revalidatePath("/categories");
@@ -51,8 +64,14 @@ export async function updateCategory(
 
 export async function deleteCategory(id: string) {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
     await prisma.category.delete({
-      where: { id },
+      where: { id, userId: session.user.id },
     });
     revalidatePath("/categories");
     return { success: true };

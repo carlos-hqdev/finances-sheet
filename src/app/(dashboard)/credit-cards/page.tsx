@@ -1,8 +1,24 @@
 import { CreditCardActions, CreditCardDialog } from "@/features/credit-cards";
 import { prisma } from "@/shared/lib/db";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default async function CreditCardsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return redirect("/sign-in");
+  }
+
+  const userId = session.user.id;
+
   const creditCardsRaw = await prisma.creditCard.findMany({
+    where: {
+      account: { userId },
+    },
     include: { account: true },
   });
 
@@ -15,7 +31,8 @@ export default async function CreditCardsPage() {
     },
   }));
 
-  const accountsRaw = await prisma.account.findMany({
+  const accountsRaw = await prisma.bankAccount.findMany({
+    where: { userId },
     select: { id: true, name: true, balance: true },
   });
 

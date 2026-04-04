@@ -1,6 +1,16 @@
 import { AccountForm, AccountList } from "@/features/accounts";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function AccountsPage() {
+export default async function AccountsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return redirect("/sign-in");
+  }
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between mb-6">

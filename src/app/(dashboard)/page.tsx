@@ -14,6 +14,9 @@ import {
   SummaryCard,
   YearlyComparisonChart,
 } from "@/features/dashboard";
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 interface PageProps {
   searchParams: Promise<{
@@ -25,7 +28,15 @@ interface PageProps {
 }
 
 export default async function Home({ searchParams }: PageProps) {
-  const MOCK_USER_ID = "cm4nt3q2v0000abc123456789";
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return redirect("/sign-in");
+  }
+
+  const userId = session.user.id;
   const params = await searchParams;
 
   const selectedMonth = params.month;
@@ -46,13 +57,13 @@ export default async function Home({ searchParams }: PageProps) {
     availableMonths,
     periodAnalysisData,
   ] = await Promise.all([
-    getDashboardBalances(MOCK_USER_ID, selectedMonth),
-    getCurrentMonthTransactions(MOCK_USER_ID, selectedMonth),
-    getAggregatedTransactions(12),
-    getPatrimonyBreakdown(MOCK_USER_ID, selectedMonth),
-    getYearlyComparison(MOCK_USER_ID),
-    getAvailableMonths(MOCK_USER_ID),
-    getYearlyPeriodComparison(MOCK_USER_ID, targetYear, baseYear, analysisType),
+    getDashboardBalances(userId, selectedMonth),
+    getCurrentMonthTransactions(userId, selectedMonth),
+    getAggregatedTransactions(userId, 12),
+    getPatrimonyBreakdown(userId, selectedMonth),
+    getYearlyComparison(userId),
+    getAvailableMonths(userId),
+    getYearlyPeriodComparison(userId, targetYear, baseYear, analysisType),
   ]);
 
   const formatCurrency = (value: number) =>

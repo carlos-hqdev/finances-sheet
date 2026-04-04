@@ -6,35 +6,96 @@ datasource db {
   provider = "postgresql"
 }
 
+// ============================================================
+// AUTH MODELS (Better Auth)
+// ============================================================
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  accounts  Account[]
-  categories Category[]
-  budgets   Budget[]
-  investments Investment[]
-  
+  id            String   @id @default(cuid())
+  name          String
+  displayName   String?
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+
+  // Relações de autenticação
+  sessions      Session[]
+  accounts      Account[]
+
+  // Relações financeiras
+  bankAccounts  BankAccount[]
+  categories    Category[]
+  budgets       Budget[]
+  investments   Investment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Tabela de contas OAuth do Better Auth (não é a conta bancária)
 model Account {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  type        String   // CHECKING, INVESTMENT, CASH (Enums not fully supported in SQLite in same way, using String)
-  institution String?
-  balance     Decimal  @default(0)
-  color       String?  // Hex code
-  
-  user        User     @relation(fields: [userId], references: [id])
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ============================================================
+// FINANCE MODELS
+// ============================================================
+
+model BankAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  type         String   // CHECKING, INVESTMENT, CASH
+  institution  String?
+  balance      Decimal  @default(0)
+  color        String?  // Hex code
+
+  user         User     @relation(fields: [userId], references: [id])
   transactions Transaction[] @relation("AccountTransactions")
   incomingTransfers Transaction[] @relation("TransferDestination")
-  creditCards CreditCard[]
+  creditCards  CreditCard[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model CreditCard {
@@ -43,8 +104,8 @@ model CreditCard {
   limit       Decimal
   closingDay  Int      // 1-31
   dueDay      Int      // 1-31
-  
-  account     Account  @relation(fields: [accountId], references: [id])
+
+  account     BankAccount @relation(fields: [accountId], references: [id])
   transactions Transaction[]
   invoices    Invoice[]
 
@@ -58,44 +119,44 @@ model Category {
   name      String
   color     String?
   icon      String?  // Lucide icon name
-  
+
   user      User     @relation(fields: [userId], references: [id])
   transactions Transaction[]
   budgets   Budget[]
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  accountId   String
-  categoryId  String?
-  creditCardId String?
-  investmentId String?
-  
-  amount      Decimal
-  type        String   // INCOME, EXPENSE, TRANSFER
-  paymentMethod String? // CREDIT_CARD, DEBIT_CARD, PIX, BOLETO, CASH, TRANSFER, OTHER
-  date        DateTime
-  description String
-  isPaid      Boolean  @default(false)
-  
+  id            String   @id @default(cuid())
+  accountId     String
+  categoryId    String?
+  creditCardId  String?
+  investmentId  String?
+
+  amount        Decimal
+  type          String   // INCOME, EXPENSE, TRANSFER
+  paymentMethod String?  // CREDIT_CARD, DEBIT_CARD, PIX, BOLETO, CASH, TRANSFER, OTHER
+  date          DateTime
+  description   String
+  isPaid        Boolean  @default(false)
+
   // Installments / Recurrence Logic
-  isRecurring Boolean @default(false)
-  recurringId String?
+  isRecurring        Boolean @default(false)
+  recurringId        String?
   installmentCurrent Int?
   installmentTotal   Int?
 
-  account     Account  @relation(fields: [accountId], references: [id], name: "AccountTransactions")
-  category    Category? @relation(fields: [categoryId], references: [id])
-  creditCard  CreditCard? @relation(fields: [creditCardId], references: [id])
-  investment  Investment? @relation(fields: [investmentId], references: [id])
+  account     BankAccount  @relation(fields: [accountId], references: [id], name: "AccountTransactions")
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  creditCard  CreditCard?  @relation(fields: [creditCardId], references: [id])
+  investment  Investment?  @relation(fields: [investmentId], references: [id])
   investmentLots InvestmentLot[]
-  
+
   referenceMonth String? // Format: "YYYY-MM"
-  invoiceId   String?
-  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId      String?
+  invoice        Invoice? @relation(fields: [invoiceId], references: [id])
 
   destinationAccountId String?
-  destinationAccount   Account? @relation("TransferDestination", fields: [destinationAccountId], references: [id])
+  destinationAccount   BankAccount? @relation("TransferDestination", fields: [destinationAccountId], references: [id])
 
   condition   TransactionCondition @default(A_VISTA)
   notes       String?
@@ -116,7 +177,7 @@ model Budget {
   amount      Decimal
   month       Int
   year        Int
-  
+
   user        User     @relation(fields: [userId], references: [id])
   category    Category @relation(fields: [categoryId], references: [id])
 
@@ -131,7 +192,7 @@ model Invoice {
   totalAmount  Decimal  @default(0)
   isPaid       Boolean  @default(false)
   dueDate      DateTime?
-  
+
   creditCard   CreditCard @relation(fields: [creditCardId], references: [id])
   transactions Transaction[]
 
@@ -142,26 +203,26 @@ model Invoice {
 }
 
 model Investment {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  type        String   // VARIABLE, FIXED, CRYPTO, ETC
-  category    String?
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  type         String   // VARIABLE, FIXED, CRYPTO, ETC
+  category     String?
   targetAmount Decimal? // Goal amount for Savings
-  amount      Decimal? // Quantity held
-  balance     Decimal  @default(0) // Current monetary value (manual update)
-  yieldRate   Decimal?
-  isDailyYield Boolean @default(false)
-  indexer     String?  // CDI, SELIC, IPCA, PREFIXED, OTHER
-  institution String?
-  
-  user        User     @relation(fields: [userId], references: [id])
-  history     InvestmentHistory[]
-  lots        InvestmentLot[]
+  amount       Decimal? // Quantity held
+  balance      Decimal  @default(0) // Current monetary value (manual update)
+  yieldRate    Decimal?
+  isDailyYield Boolean  @default(false)
+  indexer      String?  // CDI, SELIC, IPCA, PREFIXED, OTHER
+  institution  String?
+
+  user         User     @relation(fields: [userId], references: [id])
+  history      InvestmentHistory[]
+  lots         InvestmentLot[]
   transactions Transaction[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model InvestmentHistory {
@@ -169,7 +230,7 @@ model InvestmentHistory {
   investmentId String
   balance      Decimal
   date         DateTime   @default(now())
-  
+
   investment   Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
 
   createdAt    DateTime   @default(now())
@@ -184,7 +245,7 @@ model InvestmentLot {
   originalPrice    Decimal
   currentBalance   Decimal
   isFullyWithdrawn Boolean      @default(false)
-  
+
   investment       Investment   @relation(fields: [investmentId], references: [id])
   transaction      Transaction  @relation(fields: [transactionId], references: [id])
 
