@@ -9,11 +9,11 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/finances_sheet
-      # Add other env vars here or use an env_file
-      # - NEXTAUTH_SECRET=changeme
-      # - NEXTAUTH_URL=http://localhost:3000
+      # Sobrescreve a DATABASE_URL do .env para usar o host 'db' na rede do Docker
+      - DATABASE_URL=postgresql://user:password@db:5432/finances_sheet
     depends_on:
       - db
     networks:
