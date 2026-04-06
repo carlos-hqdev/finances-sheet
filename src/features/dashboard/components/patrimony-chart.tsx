@@ -55,7 +55,7 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
     <div className="flex flex-col h-full gap-4">
       {/* Donut */}
       <div className="flex-1 min-h-45">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <PieChart>
             <Pie
               data={dataWithPct}

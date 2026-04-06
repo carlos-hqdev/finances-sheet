@@ -127,7 +127,7 @@ export function YearlyComparisonChart({
       </div>
 
       <div className="flex-1 min-h-62.5">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}

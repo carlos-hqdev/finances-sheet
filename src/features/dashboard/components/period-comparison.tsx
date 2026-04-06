@@ -223,7 +223,7 @@ export function PeriodComparisonAnalysis({
 
       {/* Gráfico de Barras Agrupadas */}
       <div className="h-75 w-full mt-4">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}

@@ -181,11 +181,11 @@ export default function Sidebar({
             >
               <div className="flex items-center gap-3">
                 {user?.name ? (
-                  <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
+                  <div suppressHydrationWarning className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
                     {firstName.substring(0, 2).toUpperCase()}
                   </div>
                 ) : (
-                  <div className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
+                  <div suppressHydrationWarning className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
                     U
                   </div>
                 )}
