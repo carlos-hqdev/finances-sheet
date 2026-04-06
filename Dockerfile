@@ -21,6 +21,10 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV BETTER_AUTH_SECRET="dummy_secret_for_build"
+ENV BETTER_AUTH_URL="http://localhost:3000"
+
 RUN corepack enable pnpm && pnpm prisma generate
 RUN corepack enable pnpm && pnpm run build
 
