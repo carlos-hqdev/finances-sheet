@@ -8,6 +8,7 @@ export async function updateProfile(data: {
   name?: string;
   image?: string;
   displayName?: string;
+  cpf?: string;
 }) {
   try {
     const session = await auth.api.getSession({
@@ -26,6 +27,7 @@ export async function updateProfile(data: {
         name: data.name,
         image: data.image,
         displayName: data.displayName,
+        cpf: data.cpf,
       },
     });
 
