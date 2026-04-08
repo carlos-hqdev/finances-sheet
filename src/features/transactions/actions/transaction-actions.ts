@@ -2,9 +2,9 @@
 
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/shared/lib/db";
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/db";
 import { getFinanceReferenceMonth } from "@/shared/lib/finance-utils";
 
 export async function createTransaction(data: {
@@ -44,7 +44,8 @@ export async function createTransaction(data: {
       const account = await tx.bankAccount.findUnique({
         where: { id: data.accountId, userId },
       });
-      if (!account) throw new Error("Conta não encontrada ou não pertence ao usuário");
+      if (!account)
+        throw new Error("Conta não encontrada ou não pertence ao usuário");
 
       let invoiceId: string | undefined;
 
@@ -697,5 +698,102 @@ export async function toggleTransactionIsPaid(id: string, isPaid: boolean) {
     }
     console.error("Failed to toggle transaction isPaid:", error);
     return { error: "Failed to update transaction status" };
+  }
+}
+
+export async function deleteTransactions(ids: string[]) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
+    const userId = session.user.id;
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Validar e carregar todas as transações primeiro
+      const transactions = await tx.transaction.findMany({
+        where: {
+          id: { in: ids },
+          account: { userId },
+        },
+      });
+
+      if (transactions.length !== ids.length) {
+        throw new Error(
+          "Uma ou mais transações não foram encontradas ou não pertencem ao usuário",
+        );
+      }
+
+      // 2. Processar estornos e exclusões individualmente dentro da transação
+      for (const oldTx of transactions) {
+        await revertTransactionImpacts(tx, oldTx);
+        await tx.transaction.delete({ where: { id: oldTx.id } });
+      }
+    });
+
+    revalidatePath("/transactions");
+    revalidatePath("/accounts");
+    revalidatePath("/");
+    return { success: true, count: ids.length };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to delete bulk transactions:", error.message);
+      return { error: error.message };
+    }
+    return { error: "Erro ao excluir transações em lote" };
+  }
+}
+
+export async function bulkTogglePaymentStatus(ids: string[], isPaid: boolean) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session) throw new Error("Não autorizado");
+
+    const userId = session.user.id;
+
+    await prisma.$transaction(async (tx) => {
+      const transactions = await tx.transaction.findMany({
+        where: {
+          id: { in: ids },
+          account: { userId },
+        },
+      });
+
+      if (transactions.length !== ids.length) {
+        throw new Error("Uma ou mais transações não autorizadas");
+      }
+
+      for (const oldTx of transactions) {
+        if (oldTx.isPaid === isPaid) continue;
+
+        if (oldTx.isPaid && !isPaid) {
+          await revertTransactionImpacts(tx, oldTx);
+        } else if (!oldTx.isPaid && isPaid) {
+          const virtualPaidTx = { ...oldTx, isPaid: true };
+          await applyTransactionImpacts(tx, virtualPaidTx);
+        }
+
+        await tx.transaction.update({
+          where: { id: oldTx.id },
+          data: { isPaid },
+        });
+      }
+    });
+
+    revalidatePath("/transactions");
+    revalidatePath("/accounts");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed bulk toggle status:", error.message);
+      return { error: error.message };
+    }
+    return { error: "Erro ao atualizar status das transações" };
   }
 }
