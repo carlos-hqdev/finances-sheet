@@ -4,6 +4,8 @@ import {
   TransactionActions,
   TransactionDialog,
   TransactionIsPaidSwitch,
+  ImportTransactionsDialog,
+  TransactionsTable,
 } from "@/features/transactions";
 import { prisma } from "@/shared/lib/db";
 import { auth } from "@/shared/lib/auth";
@@ -106,12 +108,18 @@ export default async function TransactionsPage() {
             Visualize e gerencie suas receitas e despesas.
           </p>
         </div>
-        <TransactionDialog
-          accounts={accounts}
-          categories={categories}
-          creditCards={creditCards}
-          investments={investments}
-        />
+        <div className="flex items-center gap-2">
+          <ImportTransactionsDialog 
+            accounts={accounts} 
+            categories={categories} 
+          />
+          <TransactionDialog
+            accounts={accounts}
+            categories={categories}
+            creditCards={creditCards}
+            investments={investments}
+          />
+        </div>
       </div>
 
       {transactions.length === 0 ? (
@@ -119,82 +127,13 @@ export default async function TransactionsPage() {
           Nenhuma transação encontrada.
         </div>
       ) : (
-        <div className="rounded-md border border-border bg-card overflow-hidden">
-          <table className="w-full text-sm text-left text-muted-foreground">
-            <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-              <tr>
-                <th className="px-6 py-3">Data</th>
-                <th className="px-6 py-3">Descrição</th>
-                <th className="px-6 py-3">Categoria</th>
-                <th className="px-6 py-3">Conta</th>
-                <th className="px-6 py-3">Método</th>
-                <th className="px-6 py-3 text-right">Valor</th>
-                <th className="px-6 py-3 text-center">Pago</th>
-                <th className="px-6 py-3 text-center w-12.5">
-                  <span className="sr-only">Ações</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tx) => (
-                <tr
-                  key={tx.id}
-                  className="border-b border-border hover:bg-muted/50 transition-colors"
-                >
-                  <td className="px-6 py-4 font-medium backdrop-blur-sm">
-                    {format(tx.date, "dd/MM/yyyy", { locale: ptBR })}
-                  </td>
-                  <td className="px-6 py-4 text-foreground">
-                    {tx.description}
-                  </td>
-                  <td className="px-6 py-4">
-                    {tx.category?.name ? (
-                      <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                        {tx.category.name}
-                      </span>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {tx.account.name}
-                  </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {tx.paymentMethod
-                      ? PAYMENT_METHODS_MAP[tx.paymentMethod] ||
-                        tx.paymentMethod.replace(/_/g, " ")
-                      : "-"}
-                  </td>
-                  <td
-                    className={`px-6 py-4 text-right font-semibold ${tx.type === "EXPENSE" ? "text-red-500 dark:text-red-400" : "text-emerald-500 dark:text-emerald-400"}`}
-                  >
-                    {tx.type === "EXPENSE" ? "-" : "+"}
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(Number(tx.amount))}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <TransactionIsPaidSwitch
-                      transactionId={tx.id}
-                      isPaid={tx.isPaid}
-                      type={tx.type}
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <TransactionActions
-                      transaction={tx}
-                      accounts={accounts}
-                      categories={categories}
-                      creditCards={creditCards}
-                      investments={investments}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <TransactionsTable 
+           transactions={transactions}
+           accounts={accounts}
+           categories={categories}
+           creditCards={creditCards}
+           investments={investments}
+        />
       )}
     </>
   );

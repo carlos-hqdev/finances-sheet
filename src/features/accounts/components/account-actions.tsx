@@ -2,6 +2,7 @@
 
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteAccount } from "@/features/accounts/actions/account-actions";
 
 import {
@@ -53,9 +54,10 @@ export function AccountActions({ account }: AccountActionsProps) {
       const result = await deleteAccount(account.id);
       if (result.success) {
         setIsDeleteOpen(false);
+        toast.success("Conta excluída com sucesso.");
       } else {
         console.error(result.error);
-        alert(result.error);
+        toast.error(result.error);
       }
     });
   }

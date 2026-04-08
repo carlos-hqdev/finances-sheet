@@ -2,6 +2,17 @@
 
 import { Settings2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import { InvestmentDialog } from "./investment-dialog";
 
@@ -24,8 +35,9 @@ export function InvestmentDetailActions({
   investment,
 }: InvestmentDetailActionsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  // Assuming handleDelete and isDeleting are defined elsewhere or will be added
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDelete = () => {
     setIsDeleting(true);
     // Placeholder for actual delete logic
@@ -33,7 +45,8 @@ export function InvestmentDetailActions({
     // Simulate async operation
     setTimeout(() => {
       setIsDeleting(false);
-      alert("Investment deleted (simulated)");
+      setIsDeleteOpen(false);
+      toast.success("Investimento excluído com sucesso (simulado).");
       // In a real app, you'd likely navigate away or refresh data
     }, 1500);
   };
@@ -63,12 +76,40 @@ export function InvestmentDetailActions({
       <Button
         variant="destructive"
         className="gap-2"
-        onClick={handleDelete}
+        onClick={() => setIsDeleteOpen(true)}
         disabled={isDeleting}
       >
         <Trash2 className="w-4 h-4" />
         {isDeleting ? "Excluindo..." : "Excluir"}
       </Button>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem absoluta certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação excluirá permanentemente o investimento{" "}
+              <strong>{investment.name}</strong>. Esta operação não pode ser
+              desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Excluindo..." : "Sim, excluir tudo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

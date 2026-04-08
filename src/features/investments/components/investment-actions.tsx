@@ -2,9 +2,20 @@
 
 import type { Prisma } from "@prisma/client";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteInvestment } from "@/features/investments/actions/investment-actions";
 import { InvestmentDialog } from "@/features/investments/components/investment-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -24,14 +35,19 @@ interface InvestmentActionsProps {
 }
 
 export function InvestmentActions({ investment }: InvestmentActionsProps) {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
-    if (confirm("Tem certeza que deseja excluir este investimento?")) {
-      startTransition(async () => {
-        await deleteInvestment(investment.id);
-      });
-    }
+    startTransition(async () => {
+      const result = await deleteInvestment(investment.id);
+      if (result?.success) {
+        setIsDeleteOpen(false);
+        toast.success("Investimento excluído com sucesso.");
+      } else if (result?.error) {
+        toast.error(result.error);
+      }
+    });
   }
 
   // Converter tipos do prisma para compatibilidade com o form
@@ -67,14 +83,39 @@ export function InvestmentActions({ investment }: InvestmentActionsProps) {
           />
           <DropdownMenuItem
             className="text-red-500 focus:text-red-500"
-            onClick={handleDelete}
+            onClick={() => setIsDeleteOpen(true)}
             disabled={isPending}
           >
-            <Trash className="mr-2 h-4 w-4" />{" "}
-            {isPending ? "Excluindo..." : "Excluir"}
+            <Trash className="mr-2 h-4 w-4" /> Excluir
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza absoluta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação excluirá permanentemente o investimento{" "}
+              <strong>{investment.name}</strong> e todos os seus lotes e
+              históricos. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={isPending}
+            >
+              {isPending ? "Excluindo..." : "Sim, excluir tudo"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

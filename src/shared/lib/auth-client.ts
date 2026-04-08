@@ -7,6 +7,9 @@ export const authClient = createAuthClient({
       displayName: {
         type: "string",
       },
+      cpf: {
+        type: "string",
+      },
     },
   },
 });

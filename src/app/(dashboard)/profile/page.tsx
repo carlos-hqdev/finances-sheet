@@ -28,6 +28,7 @@ export default function ProfilePage() {
     displayName: "",
     email: "",
     image: "",
+    cpf: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -44,6 +45,7 @@ export default function ProfilePage() {
         displayName: (user as any).displayName || "",
         email: user.email || "",
         image: user.image || "",
+        cpf: (user as any).cpf || "",
       });
     }
   }, [user]);
@@ -58,6 +60,7 @@ export default function ProfilePage() {
         name: profileData.name,
         image: profileData.image,
         displayName: profileData.displayName,
+        cpf: profileData.cpf,
       });
 
       if (result.error) {
@@ -197,6 +200,19 @@ export default function ProfilePage() {
                       />
                       <p className="text-[10px] text-muted-foreground">
                         Se vazio, usaremos seu nome completo: <strong>{profileData.name}</strong>
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="cpf">Documento / CPF</Label>
+                      <Input
+                        id="cpf"
+                        placeholder="___.___.___-__"
+                        value={profileData.cpf}
+                        onChange={(e) => setProfileData({ ...profileData, cpf: e.target.value })}
+                        className="bg-background/50 border-muted-foreground/20 focus:border-primary"
+                      />
+                      <p className="text-[10px] text-muted-foreground">
+                        Usado para ajudar o sistema a reconhecer transferências internas em importação de arquivo.
                       </p>
                     </div>
                     <div className="grid gap-2">

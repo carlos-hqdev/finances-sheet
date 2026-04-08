@@ -2,6 +2,7 @@
 
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteCategory } from "@/features/categories/actions/category-actions";
 
 import {
@@ -44,9 +45,10 @@ export function CategoryActions({ category, userId }: CategoryActionsProps) {
       const result = await deleteCategory(category.id);
       if (result?.success) {
         setIsDeleteOpen(false);
+        toast.success("Categoria excluída com sucesso.");
       } else if (result?.error) {
         console.error(result.error);
-        alert(result.error);
+        toast.error(result.error);
       }
     });
   }

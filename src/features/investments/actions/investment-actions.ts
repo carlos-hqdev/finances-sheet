@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/shared/lib/db";
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/db";
 
 export async function createInvestment(data: {
   name: string;
@@ -24,13 +24,19 @@ export async function createInvestment(data: {
 
   const userId = session.user.id;
 
-  await prisma.investment.create({
-    data: {
-      ...data,
-      userId: userId,
-    },
-  });
-  revalidatePath("/investments");
+  try {
+    await prisma.investment.create({
+      data: {
+        ...data,
+        userId: userId,
+      },
+    });
+    revalidatePath("/investments");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to create investment:", error);
+    return { error: "Erro ao criar investimento" };
+  }
 }
 
 export async function updateInvestment(
@@ -51,11 +57,17 @@ export async function updateInvestment(
 
   if (!session) throw new Error("Não autorizado");
 
-  await prisma.investment.update({
-    where: { id, userId: session.user.id },
-    data,
-  });
-  revalidatePath("/investments");
+  try {
+    await prisma.investment.update({
+      where: { id, userId: session.user.id },
+      data,
+    });
+    revalidatePath("/investments");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update investment:", error);
+    return { error: "Erro ao atualizar investimento" };
+  }
 }
 
 export async function deleteInvestment(id: string) {
@@ -67,20 +79,26 @@ export async function deleteInvestment(id: string) {
 
   const userId = session.user.id;
 
-  // Verifique se precisa deletar o histórico primeiro
-  await prisma.investmentHistory.deleteMany({
-    where: { investmentId: id, investment: { userId } },
-  });
+  try {
+    // Verifique se precisa deletar o histórico primeiro
+    await prisma.investmentHistory.deleteMany({
+      where: { investmentId: id, investment: { userId } },
+    });
 
-  // Deletar os lotes primeiro
-  await prisma.investmentLot.deleteMany({
-    where: { investmentId: id, investment: { userId } },
-  });
+    // Deletar os lotes primeiro
+    await prisma.investmentLot.deleteMany({
+      where: { investmentId: id, investment: { userId } },
+    });
 
-  await prisma.investment.delete({
-    where: { id, userId },
-  });
-  revalidatePath("/investments");
+    await prisma.investment.delete({
+      where: { id, userId },
+    });
+    revalidatePath("/investments");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete investment:", error);
+    return { error: "Erro ao excluir investimento" };
+  }
 }
 
 export async function editInvestmentLot(lotId: string, data: any) {

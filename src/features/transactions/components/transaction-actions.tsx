@@ -2,6 +2,7 @@
 
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteTransaction } from "@/features/transactions/actions/transaction-actions";
 import {
   AlertDialog,
@@ -51,9 +52,10 @@ export function TransactionActions({
       const result = await deleteTransaction(transaction.id);
       if (result?.success) {
         setIsDeleteOpen(false);
+        toast.success("Transação excluída com sucesso.");
       } else if (result?.error) {
         console.error(result.error);
-        alert(result.error);
+        toast.error(result.error);
       }
     });
   }

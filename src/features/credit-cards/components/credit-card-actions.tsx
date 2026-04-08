@@ -2,6 +2,7 @@
 
 import { Copy, Edit2, MoreHorizontal, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { deleteCreditCard } from "@/features/credit-cards/actions/card-actions";
 
 import {
@@ -47,9 +48,10 @@ export function CreditCardActions({
       const result = await deleteCreditCard(creditCard.id);
       if (result?.success) {
         setIsDeleteOpen(false);
+        toast.success("Cartão de crédito excluído com sucesso.");
       } else if (result?.error) {
         console.error(result.error);
-        alert(result.error);
+        toast.error(result.error);
       }
     });
   }

@@ -1,0 +1,82 @@
+INITIAL_BALANCE;CREDITS;DEBITS;FINAL_BALANCE
+6.485,92;7.526,18;-10.639,01;3.373,09
+
+RELEASE_DATE;TRANSACTION_TYPE;REFERENCE_ID;TRANSACTION_NET_AMOUNT;PARTIAL_BALANCE
+01-10-2024;Rendimentos ;1440453073525;2,24;6.488,16
+01-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;89326996654;-100,00;6.388,16
+01-10-2024;Transferência Pix enviada Cleide chaves da conceicao;89329662136;-100,00;6.288,16
+02-10-2024;Rendimentos ;1441896296466;2,14;6.290,30
+02-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;89103695165;-200,00;6.090,30
+02-10-2024;Dinheiro reservado Reserva de emergência;89447200674;-2.900,00;3.190,30
+02-10-2024;Pagamento com QR Pix MWA INTERNET .COM LTDA;89139346581;-74,17;3.116,13
+02-10-2024;Pagamento com QR Pix LIGHT SERVICOS DE ELETRICIDADE S A;89139322753;-332,32;2.783,81
+03-10-2024;Rendimentos ;1442909820605;2,09;2.785,90
+04-10-2024;Rendimentos ;1444660786760;0,96;2.786,86
+04-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;89602431338;-50,00;2.736,86
+04-10-2024;Pagamento com QR Pix DEPARTAMENTO DE TRANSITO DO ESTADO DO RIO DE JANEIRO;89614309100;-143,42;2.593,44
+05-10-2024;Transferência Pix enviada ANE CAROLINE PAIVA FERNANDES ;89704550936;-110,00;2.483,44
+05-10-2024;Transferência Pix enviada Fernando Alves da Cunha;89742563182;-1.100,00;1.383,44
+07-10-2024;Transferência Pix recebida Carlos Henrique da ConceiÃ§Ã£o Silva;89527765347;998,46;2.381,90
+07-10-2024;Rendimentos ;1445984098838;0,89;2.382,79
+07-10-2024;Pagamento com QR Pix UNIVERSIDADE ESTACIO DE SA;89862372220;-279,58;2.103,21
+07-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;89883126372;-100,00;2.003,21
+08-10-2024;Rendimentos ;1448331302246;0,69;2.003,90
+08-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;89633063273;-1.377,27;626,63
+08-10-2024;Transferência Pix enviada Sara Kimberly Patricio de Araujo;89993577254;-20,00;606,63
+09-10-2024;Rendimentos ;1449669155976;0,21;606,84
+09-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;89769205153;-60,00;546,84
+10-10-2024;Rendimentos ;1451316768384;0,19;547,03
+11-10-2024;Rendimentos ;1452788668122;0,19;547,22
+11-10-2024;Transferência Pix enviada Romulo Da Comceicao Silva;89940011529;-50,00;497,22
+14-10-2024;Rendimentos ;1454074746905;0,17;497,39
+14-10-2024;Transferência Pix enviada RENATO CABRAL;90524245604;-30,00;467,39
+14-10-2024;Dinheiro retirado Reserva de emergência;90536516828;538,94;1.006,33
+14-10-2024;Pagamento de parcela Linha de Crédito;90223377047;-538,94;467,39
+15-10-2024;Rendimentos ;1455686118938;0,16;467,55
+15-10-2024;Transferência Pix enviada Carlos Henrique Da Conceicao Silva;90611646014;-50,00;417,55
+15-10-2024;Pagamento com QR Pix AFADAX CLINICA ODONTOLOGICA QUEIMADOS LTDA;90319047125;-105,90;311,65
+16-10-2024;Rendimentos ;1457385767779;0,11;311,76
+17-10-2024;Rendimentos ;1458820726250;0,11;311,87
+18-10-2024;Rendimentos ;1460138590475;0,11;311,98
+18-10-2024;Pagamento G M R- Refeicoes Colet;90588648485;-15,00;296,98
+18-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;90904811030;-50,00;246,98
+18-10-2024;Pagamento com QR Pix Embratel;90592188639;-174,13;72,85
+18-10-2024;Dinheiro retirado Reserva de emergência;90592448251;700,00;772,85
+18-10-2024;Pagamento com QR Pix Cartao de credito;90592386725;-757,92;14,93
+18-10-2024;Dinheiro retirado Reserva de emergência;90908508164;71,19;86,12
+18-10-2024;Pagamento com QR Pix MWA INTERNET .COM LTDA;90907758004;-70,00;16,12
+18-10-2024;Dinheiro retirado Reserva de emergência;90908508164;1.600,00;1.616,12
+18-10-2024;Pagamento com QR Pix OI S.A. - EM RECUPERACAO JUDICIAL;90908684494;-160,62;1.455,50
+18-10-2024;Dinheiro reservado Reserva de emergência;90908237882;-400,00;1.055,50
+18-10-2024;Transferência Pix enviada Carlos Henrique Da Conceicao Silva;90908864502;-1.000,00;55,50
+18-10-2024;Transferência Pix recebida Carlos Henrique Da Conceicao Silva;90593495949;10,00;65,50
+19-10-2024;Transferência Pix enviada Maria das Gracas da Silva Pereira;91015880660;-65,00;0,50
+20-10-2024;Transferência Pix recebida Carlos Henrique da ConceiÃ§Ã£o Silva;90785103845;76,09;76,59
+21-10-2024;Rendimentos ;1461494532158;0,03;76,62
+22-10-2024;Rendimentos ;1463953876456;0,03;76,65
+23-10-2024;Rendimentos ;1465373491948;0,03;76,68
+23-10-2024;Pagamento com QR Pix PADARIA CONFEITARIA E LANCH ;91010372113;-14,50;62,18
+23-10-2024;Pagamento Rei Tutu 2;91336719194;-15,00;47,18
+23-10-2024;Transferência Pix enviada RAFAELA DA HORA HIPOLITO;91020839267;-15,20;31,98
+24-10-2024;Rendimentos ;1466817751982;0,02;32,00
+24-10-2024;Pagamento BAZAR DA CONSTRUCAO;91090053623;-11,99;20,01
+24-10-2024;Pix enviado A Pimenta de Assis Comercio Varejista de Material Eletrico Eletronicos;91090347863;-20,01;0,00
+24-10-2024;Transferência Pix recebida FABIO DOS SANTOS SOUSA;91092045287;12,00;12,00
+24-10-2024;Pagamento com QR Pix UBER DO BRASIL TECNOLOGIA LTDA.;91441976620;-11,98;0,02
+24-10-2024;Transferência Pix recebida IRIA DOS SANTOS VIANA;91448624850;12,00;12,02
+25-10-2024;Rendimentos ;1468121121019;0,01;12,03
+25-10-2024;Pagamento com QR Pix UBER DO BRASIL TECNOLOGIA LTDA.;91191956465;-2,06;9,97
+25-10-2024;Dinheiro recebido Desconto de juros por pagamento antecipado IFB;91237798829;2,74;12,71
+26-10-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;91588532846;-10,00;2,71
+28-10-2024;Rendimentos ;1469369730984;0,01;2,72
+29-10-2024;Rendimentos ;1470939159683;0,01;2,73
+29-10-2024;Transferência Pix recebida Carlos Henrique da ConceiÃ§Ã£o Silva;91560073599;10,00;12,73
+30-10-2024;Rendimentos ;1472562190741;0,01;12,74
+30-10-2024;Dinheiro retirado Reserva de emergência;91602608247;20,00;32,74
+30-10-2024;Pagamento G M R- Refeicoes Colet;91923015666;-15,00;17,74
+30-10-2024;Pagamento Summer Rio Distribuidor;91640863813;-14,00;3,74
+31-10-2024;Rendimentos ;1473760178470;0,01;3,75
+31-10-2024;Transferência Pix recebida CARLOS HENRIQUE DA CONCEICAO SILVA;91662697023;3.296,34;3.300,09
+31-10-2024;Transferência Pix recebida ROBERT WAGNER DA CONCEICAO SILVA;91994606528;168,00;3.468,09
+31-10-2024;Pagamento Pizzacia;92021734132;-65,00;3.403,09
+31-10-2024;Pagamento com QR Pix Roberta Cristina Telles de Mello ;91712825177;-30,00;3.373,09

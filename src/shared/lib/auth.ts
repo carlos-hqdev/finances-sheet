@@ -19,6 +19,11 @@ export const auth = betterAuth({
         required: false,
         input: true,
       },
+      cpf: {
+        type: "string",
+        required: false,
+        input: true,
+      },
     },
   },
   // Por enquanto desativado para facilitar o dev, mas configurado
