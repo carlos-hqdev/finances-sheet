@@ -1,5 +1,6 @@
 import ofxParser from 'node-ofx-parser';
 import { ParsedTransaction } from '@/features/transactions/types';
+import { detectPaymentMethod, shouldIgnoreTransaction } from './import-utils';
 
 /**
  * Função para checar uma transação e determinar se parece uma transferência interna
@@ -73,6 +74,9 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
         const amount = parseFloat(trn.TRNAMT);
         const description = typeof trn.MEMO === 'string' ? trn.MEMO : (trn.NAME || "Lançamento");
         
+        // Skip unwanted transactions (fees, summaries, etc.)
+        if (shouldIgnoreTransaction(description)) return;
+
         // Determine Internal Transfer
         const internal = isInternalTransfer(description, userDocument);
 
@@ -82,7 +86,8 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
           amount,
           description,
           type: internal ? "TRANSFER" : (amount < 0 ? "EXPENSE" : "INCOME"),
-          isInternalTransfer: internal
+          isInternalTransfer: internal,
+          paymentMethod: detectPaymentMethod(description),
         });
       });
     });

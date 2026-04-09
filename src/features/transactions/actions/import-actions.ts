@@ -15,6 +15,7 @@ export type ImportTransactionInput = {
   // Optional relations
   categoryId?: string | null;
   destinationAccountId?: string | null;
+  paymentMethod?: string | null;
   notes?: string | null;
 };
 
@@ -57,7 +58,7 @@ export async function processImportedTransactions(
         description: trx.description,
         isPaid: true, // Imported transactions are usually already paid/cleared
         notes: trx.notes,
-        paymentMethod: "OTHER",
+        paymentMethod: trx.paymentMethod || "OTHER",
       };
 
       if (trx.categoryId && !isTransfer) {

@@ -1,5 +1,6 @@
 import { ParsedTransaction } from "@/features/transactions/types";
 import { isInternalTransfer, parseAmountBR, parseDateDDMMYYYY } from "./csv-parser";
+import { detectPaymentMethod, shouldIgnoreTransaction } from "./import-utils";
 
 /**
  * PicPay PDF Adapter Regex Strategies
@@ -98,8 +99,7 @@ export function parseBrasilPdfText(text: string, userDocument?: string): ParsedT
         const isTransfer = isInternalTransfer(description, userDocument);
 
         // Ignorar se for uma linha de resumo (comum em cabeçalhos de meses ou rodapés)
-        const summaryKeywords = ['entradas:', 'saídas:', 'saida:', 'saldo do dia:', 'saldo anterior:', 'saldo sacável:'];
-        if (summaryKeywords.some(k => descLower.includes(k))) {
+        if (shouldIgnoreTransaction(description)) {
             lastDate = null;
             wordBuffer = [];
             continue;
@@ -111,7 +111,8 @@ export function parseBrasilPdfText(text: string, userDocument?: string): ParsedT
           amount,
           description: description,
           type: isTransfer ? "TRANSFER" : (amount < 0 ? "EXPENSE" : "INCOME"),
-          isInternalTransfer: isTransfer
+          isInternalTransfer: isTransfer,
+          paymentMethod: detectPaymentMethod(description),
         });
 
         lastDate = null;

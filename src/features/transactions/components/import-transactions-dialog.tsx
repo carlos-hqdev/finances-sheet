@@ -4,9 +4,10 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   AlertCircle,
-  CheckCircle2,
   ChevronRight,
   DownloadCloud,
+  FileSearch,
+  Pencil,
   UploadCloud,
   X,
 } from "lucide-react";
@@ -68,6 +69,9 @@ export function ImportTransactionsDialog({
     "grouped",
   );
   const [parsedData, setParsedData] = useState<ParsedTransaction[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingGroup, setEditingGroup] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -155,10 +159,11 @@ export function ImportTransactionsDialog({
 
       if (selectedFile.name.toLowerCase().endsWith(".ofx")) {
         const text = await selectedFile.text();
-        data = parseOFX(text, cpf);
+        data = parseOFX(text, cpf).map(t => ({ ...t, source: selectedFile.name }));
       } else if (selectedFile.name.toLowerCase().endsWith(".csv")) {
         const text = await selectedFile.text();
-        data = await parseCSV(text, cpf);
+        const parsed = await parseCSV(text, cpf);
+        data = parsed.map(t => ({ ...t, source: selectedFile.name }));
       } else if (selectedFile.name.toLowerCase().endsWith(".pdf")) {
         try {
           const arrayBuffer = await selectedFile.arrayBuffer();
@@ -180,7 +185,7 @@ export function ImportTransactionsDialog({
             fullText += pageText + "\n";
           }
 
-          data = parseBrasilPdfText(fullText, cpf);
+          data = parseBrasilPdfText(fullText, cpf).map(t => ({ ...t, source: selectedFile.name }));
         } catch (err: any) {
           if (err.name === "PasswordException") {
             return { isPasswordRequired: true };
@@ -233,12 +238,12 @@ export function ImportTransactionsDialog({
   };
 
   const handleUpdateGroup = (
-    description: string,
+    oldDescription: string,
     updates: Partial<ParsedTransaction>,
   ) => {
     setParsedData((prev) =>
       prev.map((p) => {
-        if (p.description === description) {
+        if (p.description === oldDescription) {
           const newUpdates = { ...updates };
           if (updates.type === "TRANSFER") {
             newUpdates.isInternalTransfer = true;
@@ -252,6 +257,11 @@ export function ImportTransactionsDialog({
     );
   };
 
+  const handleApplyMatch = (matchId: string, suggestedDescription: string) => {
+     handleUpdateItem(matchId, { description: suggestedDescription });
+     toast.success("Descrição atualizada com base no confronto de arquivos!");
+  };
+
   const groupedData = useMemo(() => {
     const groups: Record<
       string,
@@ -263,6 +273,7 @@ export function ImportTransactionsDialog({
         type: string;
         isInternalTransfer: boolean;
         destinationAccountId?: string;
+        paymentMethod: string;
       }
     > = {};
 
@@ -276,6 +287,7 @@ export function ImportTransactionsDialog({
           type: trx.type,
           isInternalTransfer: trx.isInternalTransfer ?? false,
           destinationAccountId: trx.destinationAccountId ?? undefined,
+          paymentMethod: trx.paymentMethod || "OTHER",
         };
       }
       groups[trx.description].count++;
@@ -286,6 +298,31 @@ export function ImportTransactionsDialog({
     });
 
     return Object.values(groups).sort((a, b) => b.count - a.count);
+  }, [parsedData]);
+
+  // Encontrar sugestões de merge (mesmo valor e data, arquivos diferentes)
+  const matchSuggestions = useMemo(() => {
+    const suggestions: Record<string, { suggestedDescription: string, fromFile: string }> = {};
+    
+    parsedData.forEach(target => {
+       // Procurar alguém com mesmo valor e data em arquivo diferente
+       const match = parsedData.find(other => 
+         other.id !== target.id && 
+         other.amount === target.amount &&
+         format(other.date, "yyyy-MM-dd") === format(target.date, "yyyy-MM-dd") &&
+         other.source !== target.source &&
+         other.description.length > target.description.length // Sugerir a maior descrição
+       );
+
+       if (match) {
+         suggestions[target.id] = {
+           suggestedDescription: match.description,
+           fromFile: match.source || "outro arquivo"
+         };
+       }
+    });
+    
+    return suggestions;
   }, [parsedData]);
 
   const handleImport = async () => {
@@ -299,6 +336,7 @@ export function ImportTransactionsDialog({
         type: t.type,
         categoryId: t.categoryId,
         destinationAccountId: t.destinationAccountId,
+        paymentMethod: t.paymentMethod,
         notes: "Importado via sistema",
       }));
 
@@ -477,9 +515,42 @@ export function ImportTransactionsDialog({
                     className="p-3 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                   >
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <span className="font-semibold text-foreground text-sm leading-tight">
-                        {group.description}
-                      </span>
+                      <div className="flex items-center gap-2 group/title">
+                        {editingGroup === group.description ? (
+                          <div className="flex items-center gap-2 w-full pr-4">
+                             <Input 
+                               autoFocus
+                               value={editValue}
+                               onChange={(e) => setEditValue(e.target.value)}
+                               className="h-7 text-xs"
+                               onKeyDown={(e) => {
+                                 if (e.key === 'Enter') {
+                                   handleUpdateGroup(group.description, { description: editValue });
+                                   setEditingGroup(null);
+                                 }
+                               }}
+                               onBlur={() => setEditingGroup(null)}
+                             />
+                          </div>
+                        ) : (
+                          <>
+                            <span className="font-semibold text-foreground text-sm leading-tight">
+                              {group.description}
+                            </span>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 opacity-0 group-hover/title:opacity-100 transition-opacity"
+                              onClick={() => {
+                                setEditingGroup(group.description);
+                                setEditValue(group.description);
+                              }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
                         {group.count} ocorrências
                       </span>
@@ -558,6 +629,27 @@ export function ImportTransactionsDialog({
                         </Select>
                       )}
                     </div>
+                    <div className="w-[140px] shrink-0">
+                      <Select
+                        value={group.paymentMethod}
+                        onValueChange={(val: any) =>
+                          handleUpdateGroup(group.description, { paymentMethod: val })
+                        }
+                      >
+                        <SelectTrigger className="h-8 text-[10px] font-bold uppercase bg-muted/50 border-none w-full">
+                          <SelectValue placeholder="Método..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PIX">PIX</SelectItem>
+                          <SelectItem value="DEBIT_CARD">Débito</SelectItem>
+                          <SelectItem value="CREDIT_CARD">Crédito</SelectItem>
+                          <SelectItem value="BOLETO">Boleto</SelectItem>
+                          <SelectItem value="TRANSFER">Transferência</SelectItem>
+                          <SelectItem value="CASH">Dinheiro</SelectItem>
+                          <SelectItem value="OTHER">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -580,9 +672,51 @@ export function ImportTransactionsDialog({
                           <span className="font-bold text-foreground text-xs bg-muted px-1.5 py-0.5 rounded">
                             {format(trx.date, "dd MMM", { locale: ptBR })}
                           </span>
-                          <span className="text-[11px] font-semibold text-foreground truncate">
-                            {trx.description}
-                          </span>
+                          <div className="flex items-center gap-1 group/desc">
+                            {editingId === trx.id ? (
+                               <Input 
+                                 autoFocus
+                                 value={editValue}
+                                 onChange={(e) => setEditValue(e.target.value)}
+                                 className="h-6 text-[10px] w-48"
+                                 onKeyDown={(e) => {
+                                   if (e.key === 'Enter') {
+                                     handleUpdateItem(trx.id, { description: editValue });
+                                     setEditingId(null);
+                                   }
+                                 }}
+                                 onBlur={() => setEditingId(null)}
+                               />
+                            ) : (
+                              <>
+                                <span className="text-[11px] font-semibold text-foreground truncate max-w-[200px]">
+                                  {trx.description}
+                                </span>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-4 w-4 opacity-0 group-hover/desc:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    setEditingId(trx.id);
+                                    setEditValue(trx.description);
+                                  }}
+                                >
+                                  <Pencil className="h-2.5 w-2.5" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          {matchSuggestions[trx.id] && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-6 px-2 text-[9px] gap-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                              onClick={() => handleApplyMatch(trx.id, matchSuggestions[trx.id].suggestedDescription)}
+                            >
+                              <FileSearch className="h-3 w-3" />
+                              Confrontar PDF
+                            </Button>
+                          )}
                         </div>
                       </div>
                       <div className="w-[110px] text-right shrink-0">
@@ -659,6 +793,27 @@ export function ImportTransactionsDialog({
                             </SelectContent>
                           </Select>
                         )}
+                      </div>
+                      <div className="w-[130px] shrink-0">
+                        <Select
+                          value={trx.paymentMethod || "OTHER"}
+                          onValueChange={(val: any) =>
+                            handleUpdateItem(trx.id, { paymentMethod: val })
+                          }
+                        >
+                          <SelectTrigger className="h-8 text-xs border-dashed w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PIX">PIX</SelectItem>
+                            <SelectItem value="DEBIT_CARD">Débito</SelectItem>
+                            <SelectItem value="CREDIT_CARD">Crédito</SelectItem>
+                            <SelectItem value="BOLETO">Boleto</SelectItem>
+                            <SelectItem value="TRANSFER">Transferência</SelectItem>
+                            <SelectItem value="CASH">Dinheiro</SelectItem>
+                            <SelectItem value="OTHER">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   ))}

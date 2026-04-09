@@ -1,5 +1,6 @@
 import Papa from 'papaparse';
 import { ParsedTransaction } from '@/features/transactions/types';
+import { detectPaymentMethod, shouldIgnoreTransaction } from './import-utils';
 
 // Mapas comuns genéricos
 const DATE_COLUMNS = ['data', 'date', 'data lançamento', 'data da transação'];
@@ -92,7 +93,10 @@ function parseBradescoCSV(lines: string[], userDocument?: string): ParsedTransac
     const dateStr = row['Data'];
     if (!dateStr || dateStr.trim() === '') return;
     
-    // Ignorar "SALDO ANTERIOR" e "Total"
+    // Ignorar ruídos globais
+    if (shouldIgnoreTransaction(row['Histórico'] || "")) return;
+    
+    // Ignorar "SALDO ANTERIOR" e "Total" (especifico Bradesco se nao estiver no global)
     if (row['Histórico']?.toLowerCase().includes("saldo anterior")) return;
     if (row['Histórico']?.toLowerCase().includes("total")) return;
 
@@ -120,7 +124,8 @@ function parseBradescoCSV(lines: string[], userDocument?: string): ParsedTransac
       amount,
       description: desc,
       type: isTransfer ? "TRANSFER" : (amount < 0 ? "EXPENSE" : "INCOME"),
-      isInternalTransfer: isTransfer
+      isInternalTransfer: isTransfer,
+      paymentMethod: detectPaymentMethod(desc),
     });
   });
 
@@ -155,7 +160,8 @@ function parseMercadoPagoCSV(lines: string[], userDocument?: string): ParsedTran
       amount,
       description: desc,
       type: isTransfer ? "TRANSFER" : (amount < 0 ? "EXPENSE" : "INCOME"),
-      isInternalTransfer: isTransfer
+      isInternalTransfer: isTransfer,
+      paymentMethod: detectPaymentMethod(desc),
     });
   });
 
@@ -203,7 +209,8 @@ function parseGenericCSV(rawContent: string, userDocument?: string): ParsedTrans
         amount,
         description: desc,
         type: isTransfer ? "TRANSFER" : (amount < 0 ? "EXPENSE" : "INCOME"),
-        isInternalTransfer: isTransfer
+        isInternalTransfer: isTransfer,
+        paymentMethod: detectPaymentMethod(desc),
       });
     });
 
