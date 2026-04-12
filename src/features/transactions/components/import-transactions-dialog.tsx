@@ -42,7 +42,7 @@ import {
 import { useSession } from "@/shared/lib/auth-client";
 import { parseCSV } from "@/shared/lib/parsers/csv-parser";
 import { parseOFX } from "@/shared/lib/parsers/ofx-parser";
-import { parseBrasilPdfText } from "@/shared/lib/parsers/pdf-parser";
+import { parsePdfFile } from "@/shared/lib/parsers/pdf-parser";
 import {
   type ImportTransactionInput,
   processImportedTransactions,
@@ -145,6 +145,8 @@ export function ImportTransactionsDialog({
     if (allTransactions.length > 0) {
       setStep(2);
       toast.success(`${allTransactions.length} transações identificadas!`);
+    } else {
+      toast.warning("Nenhuma transação foi identificada no(s) arquivo(s) selecionado(s).");
     }
     setIsLoading(false);
     setProcessingStatus("");
@@ -167,25 +169,7 @@ export function ImportTransactionsDialog({
       } else if (selectedFile.name.toLowerCase().endsWith(".pdf")) {
         try {
           const arrayBuffer = await selectedFile.arrayBuffer();
-          const pdfjs = await import("pdfjs-dist");
-          pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
-          const loadingTask = pdfjs.getDocument({
-            data: arrayBuffer,
-            password: password,
-          });
-          const pdf = await loadingTask.promise;
-          let fullText = "";
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items
-              .map((item: any) => item.str)
-              .join(" ");
-            fullText += pageText + "\n";
-          }
-
-          data = parseBrasilPdfText(fullText, cpf).map(t => ({ ...t, source: selectedFile.name }));
+          data = (await parsePdfFile(arrayBuffer, cpf, password)).map(t => ({ ...t, source: selectedFile.name }));
         } catch (err: any) {
           if (err.name === "PasswordException") {
             return { isPasswordRequired: true };
@@ -223,7 +207,12 @@ export function ImportTransactionsDialog({
     }
 
     setParsedData(allTransactions);
-    if (allTransactions.length > 0) setStep(2);
+    if (allTransactions.length > 0) {
+      setStep(2);
+      toast.success(`${allTransactions.length} transações identificadas!`);
+    } else {
+      toast.warning("Nenhuma transação foi identificada no(s) arquivo(s) selecionado(s).");
+    }
     setIsLoading(false);
     setProcessingStatus("");
   };
