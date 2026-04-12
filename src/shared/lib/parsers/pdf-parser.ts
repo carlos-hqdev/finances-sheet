@@ -242,7 +242,8 @@ function parseC6PdfItems(items: PdfItem[], userDocument?: string): ParsedTransac
       const rawAmountStr = amountMatch.replace('R$', '').trim();
       let amount = parseAmountBR(rawAmountStr);
 
-      const description = texts.filter(t => !dateRegex.test(t) && t !== amountMatch).join(' ').trim();
+      let description = joined.replace(dateMatch[0], '').replace(amountMatch, '').trim();
+      description = description.replace(/^R\$\s*/, '').trim();
       if (shouldIgnoreTransaction(description)) continue;
 
       const finalDescription = description || "[A Verificar] Lançamento sem descrição base";
