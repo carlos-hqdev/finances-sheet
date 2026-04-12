@@ -115,7 +115,8 @@ function parseBradescoCSV(lines: string[], userDocument?: string): ParsedTransac
       return;
     }
 
-    const desc = row['Histórico'] || 'Sem Lançamento';
+    const rawDesc = row['Histórico'] || '';
+    const desc = rawDesc.trim() ? rawDesc.trim() : '[A Verificar] Lançamento sem descrição extraída';
     const isTransfer = isInternalTransfer(desc, userDocument);
 
     parsedTransactions.push({
@@ -151,7 +152,8 @@ function parseMercadoPagoCSV(lines: string[], userDocument?: string): ParsedTran
     const amount = parseAmountBR(amountStr);
     if (amount === 0) return; // Ignore zero transitions unless intended
 
-    const desc = row['TRANSACTION_TYPE'] || row['DESCRIPTION'] || 'Mercado Pago Lançamento';
+    const rawDesc = row['TRANSACTION_TYPE'] || row['DESCRIPTION'] || '';
+    const desc = rawDesc.trim() ? rawDesc.trim() : '[A Verificar] Lançamento sem descrição extraída';
     const isTransfer = isInternalTransfer(desc, userDocument);
 
     parsedTransactions.push({
@@ -200,7 +202,8 @@ function parseGenericCSV(rawContent: string, userDocument?: string): ParsedTrans
       if (!date) return;
 
       const amount = parseAmountBR(row[amountField]);
-      const desc = row[descField] || "Sem Lançamento";
+      const rawDesc = row[descField] || "";
+      const desc = rawDesc.trim() ? rawDesc.trim() : "[A Verificar] Lançamento sem descrição extraída";
       const isTransfer = isInternalTransfer(desc, userDocument);
 
       parsedTransactions.push({

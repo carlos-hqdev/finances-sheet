@@ -72,7 +72,13 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
 
         const date = new Date(year, month, day, hours, minutes, seconds);
         const amount = parseFloat(trn.TRNAMT);
-        const description = typeof trn.MEMO === 'string' ? trn.MEMO : (trn.NAME || "Lançamento");
+        let description = typeof trn.MEMO === 'string' ? trn.MEMO : (trn.NAME || "");
+        
+        if (!description || description.trim() === "" || description.trim().toUpperCase() === "LANÇAMENTO" || description.trim().toUpperCase() === "LANCAMENTO") {
+          const id = trn.FITID || trn.REFNUM || "";
+          const suffix = id ? ` (ID: ${id.toString().slice(-5)})` : "";
+          description = `[A Verificar] Lançamento sem descrição base${suffix}`;
+        }
         
         // Skip unwanted transactions (fees, summaries, etc.)
         if (shouldIgnoreTransaction(description)) return;
