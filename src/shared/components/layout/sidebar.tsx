@@ -191,10 +191,10 @@ export default function Sidebar({
                 )}
                 {!isCollapsed && (
                   <div className="flex-1 overflow-hidden">
-                    <p className="text-sm font-medium truncate text-sidebar-foreground">
+                    <p suppressHydrationWarning className="text-sm font-medium truncate text-sidebar-foreground">
                       {user?.name || "Convidado"}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p suppressHydrationWarning className="text-xs text-muted-foreground truncate">
                       {user?.email || "guest@example.com"}
                     </p>
                   </div>
