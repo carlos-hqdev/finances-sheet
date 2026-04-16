@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Bar,
   CartesianGrid,
@@ -111,6 +112,12 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function CashFlowChart({ data }: CashFlowChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const chartData: ChartData[] = useMemo(
     () =>
       data.map((d) => {
@@ -163,8 +170,11 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
 
       {/* Chart */}
       <div className="flex-1" style={{ minHeight: 220 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
+        {!isMounted ? (
+          <Skeleton className="w-full h-full min-h-[220px]" />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
             data={chartData}
             margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
           >
@@ -221,6 +231,7 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
             />
           </ComposedChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

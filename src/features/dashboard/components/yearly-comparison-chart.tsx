@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Bar,
   BarChart,
@@ -101,7 +102,12 @@ export function YearlyComparisonChart({
   data,
   years,
 }: YearlyComparisonChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [view, setView] = useState<"income" | "expense">("income");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const chartData = data.map((d) => ({
     month: d.month,
@@ -127,8 +133,11 @@ export function YearlyComparisonChart({
       </div>
 
       <div className="flex-1" style={{ minHeight: 250 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+        {!isMounted ? (
+          <Skeleton className="w-full h-full min-h-[250px]" />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
@@ -179,6 +188,7 @@ export function YearlyComparisonChart({
             />
           </BarChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

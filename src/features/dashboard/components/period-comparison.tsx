@@ -2,7 +2,8 @@
 
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Bar,
   BarChart,
@@ -76,9 +77,14 @@ export function PeriodComparisonAnalysis({
   baseYear,
   type,
 }: PeriodComparisonProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -223,8 +229,11 @@ export function PeriodComparisonAnalysis({
 
       {/* Gráfico de Barras Agrupadas */}
       <div className="w-full mt-4" style={{ height: 300, minHeight: 300 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+        {!isMounted ? (
+          <Skeleton className="w-full h-full min-h-[300px]" />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
           >
@@ -272,6 +281,7 @@ export function PeriodComparisonAnalysis({
             />
           </BarChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

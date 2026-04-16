@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 type PatrimonySlice = {
   name: string;
@@ -44,6 +46,12 @@ function CustomTooltip({ active, payload }: any) {
 }
 
 export function PatrimonyChart({ data }: PatrimonyChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const total = data.reduce((s, d) => s + d.value, 0);
 
   const dataWithPct = data.map((d) => ({
@@ -55,8 +63,11 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
     <div className="flex flex-col h-full gap-4">
       {/* Donut */}
       <div className="flex-1" style={{ minHeight: 180 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+        {!isMounted ? (
+          <Skeleton className="w-full h-full min-h-[180px]" />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
             <Pie
               data={dataWithPct}
               cx="50%"
@@ -77,6 +88,7 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
             <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
+        )}
       </div>
 
       {/* Legenda lateral */}
