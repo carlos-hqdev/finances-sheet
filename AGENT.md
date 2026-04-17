@@ -78,7 +78,7 @@ pnpm biome check
 
 - **Provider**: Better-Auth
 - **Campos customizados**: displayName, cpf
-- ** Sessão**: 7 dias de validade
+- **Sessão**: 7 dias de validade
 
 ## Regras Importantes
 

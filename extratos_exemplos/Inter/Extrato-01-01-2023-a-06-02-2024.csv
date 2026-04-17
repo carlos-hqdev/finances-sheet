@@ -1,0 +1,16 @@
+Extrato Conta Corrente 
+Conta ;8968497
+Período ;01/01/2023 a 06/02/2024
+Saldo: ;0,00
+
+Data Lançamento;Descrição;Valor;Saldo
+06/02/2023;Pix recebido: Carlos Henrique Da Conceicao Silva;500,00;500,00
+06/02/2023;Pix enviado: Carlos Henrique Da Conceição Silva;-500,00;0,00
+03/05/2023;Pix recebido: Carlos Henrique Da Conceição Silva;296,00;296,00
+03/05/2023;Pix recebido: Carlos Henrique Da Conceição Silva;4,00;300,00
+03/05/2023;Pix enviado: Padaria E Confeitaria Realidade;-1,00;299,00
+04/05/2023;Pix enviado: Carlos Henrique Da Conceição Silva;-299,00;0,00
+06/01/2024;Cp :10573521-Carlos Henrique da Conceicao Silva;500,00;500,00
+06/01/2024;No estabelecimento Banco24Horas;-500,00;0,00
+06/01/2024;Estorno no estabelecimento não informado;500,00;500,00
+06/01/2024;No estabelecimento Banco24Horas;-500,00;0,00

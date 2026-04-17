@@ -1,0 +1,27 @@
+INITIAL_BALANCE;CREDITS;DEBITS;FINAL_BALANCE
+0,00;6.923,89;-6.923,89;0,00
+
+RELEASE_DATE;TRANSACTION_TYPE;REFERENCE_ID;TRANSACTION_NET_AMOUNT;PARTIAL_BALANCE
+02-08-2024;Transferência Pix recebida Carlos Henrique da ConceiÃ§Ã£o Silva;84305300136;2.000,00;2.000,00
+02-08-2024;Dinheiro reservado Reserva de emergência;84305175972;-2.000,00;0,00
+11-08-2024;Dinheiro retirado Reserva de emergência;84758865919;100,00;100,00
+11-08-2024;Transferência Pix enviada ALAN TAVARES DA SILVA;85041480268;-100,00;0,00
+13-08-2024;Dinheiro retirado Reserva de emergência;84868342821;1.000,00;1.000,00
+13-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;84868686373;-1.000,00;0,00
+18-08-2024;Dinheiro retirado Reserva de emergência;85305930739;400,00;400,00
+18-08-2024;Transferência Pix enviada Carlos Henrique Da Conceicao Silva;85591248410;-276,34;123,66
+18-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;85305893259;-123,66;0,00
+24-08-2024;Dinheiro retirado Reserva de emergência;85788778839;115,00;115,00
+24-08-2024;Transferência Pix enviada Maria das Gracas da Silva Pereira;85788839049;-115,00;0,00
+24-08-2024;Dinheiro retirado Reserva de emergência;86079076668;160,00;160,00
+24-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;86079164668;-160,00;0,00
+24-08-2024;Dinheiro retirado Reserva de emergência;86087557910;100,00;100,00
+24-08-2024;Transferência Pix enviada Cleide chaves da conceicao;85799999143;-100,00;0,00
+25-08-2024;Dinheiro retirado Reserva de emergência;85851934269;105,00;105,00
+25-08-2024;Transferência Pix enviada Fabio Badico Rafael;86139973956;-105,00;0,00
+27-08-2024;Dinheiro retirado Reserva de emergência;86268033482;25,76;25,76
+27-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;86028098065;-25,76;0,00
+31-08-2024;Transferência Pix recebida CARLOS HENRIQUE DA CONCEICAO SILVA;86314218287;2.918,13;2.918,13
+31-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;86314250187;-50,00;2.868,13
+31-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;86630218850;-200,00;2.668,13
+31-08-2024;Transferência Pix enviada Carlos Henrique da Conceicao Silva;86362602911;-2.668,13;0,00
