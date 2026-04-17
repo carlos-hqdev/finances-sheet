@@ -5,17 +5,17 @@ import {
   BarChart,
   CreditCard,
   LayoutDashboard,
-  Settings,
-  Wallet,
   PiggyBank,
+  Settings,
   Target,
   TrendingUp,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/shared/lib/utils";
-import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useEffect, useState } from "react";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { cn } from "@/shared/lib/utils";
 import type { SidebarInfo } from "./admin-layout-wrapper";
 
 interface NavItem {
@@ -194,8 +194,8 @@ export default function Sidebar({
       <div className="p-4 border-t border-sidebar-border">
         {!isLoaded ? (
           <div className="space-y-2">
-            {[1, 2].map((i) => (
-              <Skeleton key={i} className="h-6 w-full" />
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-4 w-full" />
             ))}
           </div>
         ) : sidebarInfo ? (
