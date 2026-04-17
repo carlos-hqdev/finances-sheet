@@ -173,9 +173,9 @@ export default function Sidebar({
       <div className="p-4 border-t border-sidebar-border">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div
+            <button
               className={cn(
-                "block rounded-lg  border border-sidebar-border p-3 mb-2 transition-all hover:bg-sidebar-accent cursor-pointer outline-none",
+                "block rounded-lg  border border-sidebar-border p-3 mb-2 transition-all hover:bg-sidebar-accent cursor-pointer outline-none w-full text-left",
                 isCollapsed ? "flex justify-center" : "",
               )}
             >
@@ -200,7 +200,7 @@ export default function Sidebar({
                   </div>
                 )}
               </div>
-            </div>
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side={isCollapsed ? "right" : "top"}
