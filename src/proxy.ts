@@ -1,6 +1,6 @@
 import { betterFetch } from "@better-fetch/fetch";
-import { NextResponse, type NextRequest } from "next/server";
 import type { Session } from "better-auth/types";
+import { type NextRequest, NextResponse } from "next/server";
 
 export default async function proxy(request: NextRequest) {
   const { data: session } = await betterFetch<Session>(
@@ -14,8 +14,9 @@ export default async function proxy(request: NextRequest) {
     },
   );
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/sign-in") || 
-                     request.nextUrl.pathname.startsWith("/sign-up");
+  const isAuthPage =
+    request.nextUrl.pathname.startsWith("/sign-in") ||
+    request.nextUrl.pathname.startsWith("/sign-up");
 
   if (!session) {
     if (isAuthPage) {

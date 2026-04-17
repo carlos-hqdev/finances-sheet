@@ -22,7 +22,7 @@ export default function DashboardLoading() {
           <Skeleton className="h-[400px] w-full rounded-xl" />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-4 mt-4">
         <Skeleton className="h-[350px] w-full rounded-xl" />
       </div>

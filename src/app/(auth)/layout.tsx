@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Autenticação | Finances Sheet",
@@ -15,7 +15,7 @@ export default function AuthLayout({
       {/* Decorative gradients */}
       <div className="absolute top-0 -left-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl opacity-50" />
       <div className="absolute bottom-0 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl opacity-50" />
-      
+
       <div className="w-full max-w-md relative z-10 transition-all duration-300 animate-in fade-in zoom-in slide-in-from-bottom-4">
         {children}
       </div>

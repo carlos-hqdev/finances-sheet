@@ -703,7 +703,7 @@ export function ImportTransactionsDialog({
                               />
                             ) : (
                               <>
-                                <span className="text-[11px] font-semibold text-foreground truncate max-w-50">
+                                <span className="text-[11px] font-semibold text-foreground truncate max-w-1/2">
                                   {trx.description}
                                 </span>
                                 <Button

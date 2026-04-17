@@ -124,9 +124,9 @@
   }
 }
 
-.recharts-wrapper, 
-.recharts-wrapper *, 
-.recharts-surface, 
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
 .recharts-surface * {
   outline: none !important;
   user-select: none !important;

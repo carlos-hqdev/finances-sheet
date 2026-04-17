@@ -4,11 +4,11 @@
 // import { logout } from "@/features/users/actions-auth"; // Not implemented yet
 // import { SessionTimer } from "@/features/users/components/session-timer"; // Not implemented yet
 import type { User } from "@prisma/client";
-import { PanelLeft, User as UserIcon, LogOut, Settings } from "lucide-react";
+import { LogOut, PanelLeft, Settings, User as UserIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/utils";
-import { signOut } from "@/shared/lib/auth-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,8 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { signOut } from "@/shared/lib/auth-client";
+import { cn } from "@/shared/lib/utils";
 
 interface HeaderProps {
   toggleSidebar: () => void;

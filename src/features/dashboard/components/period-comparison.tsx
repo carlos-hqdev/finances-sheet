@@ -3,7 +3,6 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Bar,
   BarChart,
@@ -21,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 
 interface PeriodData {

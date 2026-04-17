@@ -1,16 +1,16 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
+  ImportTransactionsDialog,
   TransactionActions,
   TransactionDialog,
   TransactionIsPaidSwitch,
-  ImportTransactionsDialog,
   TransactionsTable,
 } from "@/features/transactions";
-import { prisma } from "@/shared/lib/db";
 import { auth } from "@/shared/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { prisma } from "@/shared/lib/db";
 
 const PAYMENT_METHODS_MAP: Record<string, string> = {
   CREDIT_CARD: "Cartão de Crédito",
@@ -109,9 +109,9 @@ export default async function TransactionsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <ImportTransactionsDialog 
-            accounts={accounts} 
-            categories={categories} 
+          <ImportTransactionsDialog
+            accounts={accounts}
+            categories={categories}
           />
           <TransactionDialog
             accounts={accounts}
@@ -127,12 +127,12 @@ export default async function TransactionsPage() {
           Nenhuma transação encontrada.
         </div>
       ) : (
-        <TransactionsTable 
-           transactions={transactions}
-           accounts={accounts}
-           categories={categories}
-           creditCards={creditCards}
-           investments={investments}
+        <TransactionsTable
+          transactions={transactions}
+          accounts={accounts}
+          categories={categories}
+          creditCards={creditCards}
+          investments={investments}
         />
       )}
     </>

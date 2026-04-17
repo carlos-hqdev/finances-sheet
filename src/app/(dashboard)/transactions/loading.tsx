@@ -13,13 +13,13 @@ export default function TransactionsLoading() {
           <Skeleton className="h-10 w-32" />
         </div>
       </div>
-      
+
       <div className="border border-border rounded-lg overflow-hidden">
         {/* Table header skeleton */}
         <div className="h-12 border-b border-border bg-muted/50 flex items-center px-4 gap-4">
-           {Array.from({ length: 5 }).map((_, i) => (
-             <Skeleton key={i} className="h-4 flex-1" />
-           ))}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 flex-1" />
+          ))}
         </div>
         {/* Table rows skeleton */}
         <div className="divide-y divide-border bg-card">

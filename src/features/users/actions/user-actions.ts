@@ -1,8 +1,8 @@
 "use server";
 
-import { auth } from "@/shared/lib/auth";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { auth } from "@/shared/lib/auth";
 
 export async function updateProfile(data: {
   name?: string;
@@ -32,13 +32,13 @@ export async function updateProfile(data: {
     });
 
     revalidatePath("/profile");
-    
+
     return { success: true, data: result };
   } catch (error: any) {
     console.error("Erro na Server Action updateProfile:", error);
-    return { 
-      error: error.message || "Erro interno ao atualizar perfil", 
-      status: 500 
+    return {
+      error: error.message || "Erro interno ao atualizar perfil",
+      status: 500,
     };
   }
 }

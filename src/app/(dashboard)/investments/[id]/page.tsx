@@ -128,214 +128,212 @@ export default async function InvestmentDetailPage({
 
   return (
     <div className="flex-1 space-y-6">
-        <div className="mb-4">
-          <Button
-            variant="ghost"
-            asChild
-            className="text-muted-foreground hover:text-foreground pl-0"
-          >
-            <Link href="/investments">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para Investimentos
-            </Link>
-          </Button>
-        </div>
+      <div className="mb-4">
+        <Button
+          variant="ghost"
+          asChild
+          className="text-muted-foreground hover:text-foreground pl-0"
+        >
+          <Link href="/investments">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Investimentos
+          </Link>
+        </Button>
+      </div>
 
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <PiggyBank className="h-8 w-8 text-primary" />
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">
-                {investment.name}
-              </h2>
-              <div className="flex items-center text-muted-foreground mt-1">
-                <Landmark className="mr-1 h-4 w-4" />
-                <span>{investment.institution || "Outros"}</span>
-                <span className="mx-2">•</span>
-                <span className="uppercase text-xs font-semibold tracking-wider">
-                  {(() => {
-                    const tipoFormatado =
-                      {
-                        SAVINGS: "Reserva / Caixinha",
-                        FIXED: "Renda Fixa",
-                        VARIABLE: "Renda Variável",
-                        CRYPTO: "Criptomoedas",
-                        FIIS: "Fundos Imobiliários",
-                        OTHER: "Outros",
-                      }[investment.type] || investment.type;
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <PiggyBank className="h-8 w-8 text-primary" />
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">
+              {investment.name}
+            </h2>
+            <div className="flex items-center text-muted-foreground mt-1">
+              <Landmark className="mr-1 h-4 w-4" />
+              <span>{investment.institution || "Outros"}</span>
+              <span className="mx-2">•</span>
+              <span className="uppercase text-xs font-semibold tracking-wider">
+                {(() => {
+                  const tipoFormatado =
+                    {
+                      SAVINGS: "Reserva / Caixinha",
+                      FIXED: "Renda Fixa",
+                      VARIABLE: "Renda Variável",
+                      CRYPTO: "Criptomoedas",
+                      FIIS: "Fundos Imobiliários",
+                      OTHER: "Outros",
+                    }[investment.type] || investment.type;
 
-                    const indexador =
-                      investment.indexer && investment.indexer !== "OTHER"
-                        ? ` (${investment.indexer === "PREFIXED" ? "PRÉ" : investment.indexer})`
-                        : "";
+                  const indexador =
+                    investment.indexer && investment.indexer !== "OTHER"
+                      ? ` (${investment.indexer === "PREFIXED" ? "PRÉ" : investment.indexer})`
+                      : "";
 
-                    return `${tipoFormatado}${indexador}`;
-                  })()}
-                </span>
-              </div>
+                  return `${tipoFormatado}${indexador}`;
+                })()}
+              </span>
             </div>
           </div>
-          <div className="flex gap-2">
-            <TransactionDialog
-              accounts={accounts}
-              categories={categories}
-              creditCards={creditCards}
-              investments={investmentsList}
-              defaultType="TRANSFER"
-              defaultDestinationAccountId={investment.id} // Entrando no investimento
-              trigger={
-                <Button
-                  variant="default"
-                  className="gap-2 bg-emerald-600 hover:bg-emerald-700"
-                >
-                  <ArrowDownCircle className="w-4 h-4" />{" "}
-                  {investment.type === "FIXED" ? "Guardar" : "Aportar"}
-                </Button>
-              }
-            />
-            <TransactionDialog
-              accounts={accounts}
-              categories={categories}
-              creditCards={creditCards}
-              investments={investmentsList}
-              defaultType="TRANSFER"
-              defaultOriginAccountId={investment.id} // Saindo do investimento
-              trigger={
-                <Button
-                  variant="outline"
-                  className="gap-2 text-rose-500 hover:text-rose-600 border-rose-500/20 hover:bg-rose-500/10"
-                >
-                  <ArrowUpCircle className="w-4 h-4" /> Resgatar
-                </Button>
-              }
-            />
-            <InvestmentDetailActions investment={plainInvestment} />
-          </div>
         </div>
+        <div className="flex gap-2">
+          <TransactionDialog
+            accounts={accounts}
+            categories={categories}
+            creditCards={creditCards}
+            investments={investmentsList}
+            defaultType="TRANSFER"
+            defaultDestinationAccountId={investment.id} // Entrando no investimento
+            trigger={
+              <Button
+                variant="default"
+                className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+              >
+                <ArrowDownCircle className="w-4 h-4" />{" "}
+                {investment.type === "FIXED" ? "Guardar" : "Aportar"}
+              </Button>
+            }
+          />
+          <TransactionDialog
+            accounts={accounts}
+            categories={categories}
+            creditCards={creditCards}
+            investments={investmentsList}
+            defaultType="TRANSFER"
+            defaultOriginAccountId={investment.id} // Saindo do investimento
+            trigger={
+              <Button
+                variant="outline"
+                className="gap-2 text-rose-500 hover:text-rose-600 border-rose-500/20 hover:bg-rose-500/10"
+              >
+                <ArrowUpCircle className="w-4 h-4" /> Resgatar
+              </Button>
+            }
+          />
+          <InvestmentDetailActions investment={plainInvestment} />
+        </div>
+      </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
-              <PiggyBank className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">
-                {formatCurrency(balance)}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
+            <PiggyBank className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {formatCurrency(balance)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Meta (Target)</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {targetAmount ? formatCurrency(targetAmount) : "Não definida"}
+            </div>
+            {targetAmount && targetAmount > 0 && (
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Progresso</span>
+                  <span>{Math.round(progressPercentage)}%</span>
+                </div>
+                <Progress value={progressPercentage} className="h-2" />
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </CardContent>
+        </Card>
 
+        {investment.type === "FIXED" && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
-                Meta (Target)
+                Rendimento Configurado
               </CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
+              <Percent className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {targetAmount ? formatCurrency(targetAmount) : "Não definida"}
+                {yieldRate
+                  ? `${yieldRate}% ${
+                      investment.indexer
+                        ? investment.indexer === "PREFIXED"
+                          ? "Prefixado"
+                          : investment.indexer === "OTHER"
+                            ? ""
+                            : investment.indexer
+                        : investment.isDailyYield
+                          ? "CDI"
+                          : ""
+                    } ${investment.isDailyYield ? "(Diário)" : ""}`.trim()
+                  : "N/A"}
               </div>
-              {targetAmount && targetAmount > 0 && (
-                <div className="mt-4 space-y-2">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Progresso</span>
-                    <span>{Math.round(progressPercentage)}%</span>
-                  </div>
-                  <Progress value={progressPercentage} className="h-2" />
-                </div>
-              )}
             </CardContent>
           </Card>
+        )}
+      </div>
 
-          {investment.type === "FIXED" && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Rendimento Configurado
-                </CardTitle>
-                <Percent className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {yieldRate
-                    ? `${yieldRate}% ${
-                        investment.indexer
-                          ? investment.indexer === "PREFIXED"
-                            ? "Prefixado"
-                            : investment.indexer === "OTHER"
-                              ? ""
-                              : investment.indexer
-                          : investment.isDailyYield
-                            ? "CDI"
-                            : ""
-                      } ${investment.isDailyYield ? "(Diário)" : ""}`.trim()
-                    : "N/A"}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
+          Aportes e Lotes (PEPS)
+        </h3>
+        <InvestmentLotTable lots={mappedLots} investmentId={investment.id} />
+      </div>
 
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4 text-foreground">
-            Aportes e Lotes (PEPS)
-          </h3>
-          <InvestmentLotTable lots={mappedLots} investmentId={investment.id} />
-        </div>
-
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4 text-foreground">
-            Extrato da Caixinha
-          </h3>
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">
+          Extrato da Caixinha
+        </h3>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6">Data</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead className="text-right pr-6">Valor</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {investment.transactions.length === 0 ? (
                   <TableRow>
-                    <TableHead className="pl-6">Data</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="text-right pr-6">Valor</TableHead>
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-muted-foreground py-8"
+                    >
+                      Nenhuma transação encontrada.
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {investment.transactions.length === 0 ? (
-                    <TableRow>
+                ) : (
+                  investment.transactions.map((tx) => (
+                    <TableRow key={tx.id}>
+                      <TableCell className="pl-6 text-muted-foreground">
+                        {format(tx.date, "dd/MM/yyyy")}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {tx.description}
+                      </TableCell>
                       <TableCell
-                        colSpan={3}
-                        className="text-center text-muted-foreground py-8"
+                        className={`text-right pr-6 font-semibold ${tx.type === "INCOME" || (tx.type === "TRANSFER" && tx.paymentMethod === "APPLICATION") ? "text-emerald-500" : "text-foreground"}`}
                       >
-                        Nenhuma transação encontrada.
+                        {tx.type === "INCOME" ||
+                        (tx.type === "TRANSFER" &&
+                          tx.paymentMethod === "APPLICATION")
+                          ? "+"
+                          : "-"}
+                        {formatCurrency(tx.amount.toNumber())}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    investment.transactions.map((tx) => (
-                      <TableRow key={tx.id}>
-                        <TableCell className="pl-6 text-muted-foreground">
-                          {format(tx.date, "dd/MM/yyyy")}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {tx.description}
-                        </TableCell>
-                        <TableCell
-                          className={`text-right pr-6 font-semibold ${tx.type === "INCOME" || (tx.type === "TRANSFER" && tx.paymentMethod === "APPLICATION") ? "text-emerald-500" : "text-foreground"}`}
-                        >
-                          {tx.type === "INCOME" ||
-                          (tx.type === "TRANSFER" &&
-                            tx.paymentMethod === "APPLICATION")
-                            ? "+"
-                            : "-"}
-                          {formatCurrency(tx.amount.toNumber())}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

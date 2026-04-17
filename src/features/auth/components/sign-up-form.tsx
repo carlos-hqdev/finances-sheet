@@ -1,9 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUp } from "@/shared/lib/auth-client";
-import { signUpSchema, type SignUpValues } from "../schemas";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "@/shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,11 +16,8 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/button";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { signUp } from "@/shared/lib/auth-client";
+import { type SignUpValues, signUpSchema } from "../schemas";
 
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,19 +35,24 @@ export function SignUpForm() {
   async function onSubmit(values: SignUpValues) {
     setIsLoading(true);
     try {
-      await signUp.email({
-        email: values.email,
-        password: values.password,
-        name: values.name,
-      }, {
-        onSuccess: () => {
-          toast.success("Conta criada com sucesso! Faça login para continuar.");
-          router.push("/sign-in");
+      await signUp.email(
+        {
+          email: values.email,
+          password: values.password,
+          name: values.name,
         },
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Erro ao criar conta");
-        }
-      });
+        {
+          onSuccess: () => {
+            toast.success(
+              "Conta criada com sucesso! Faça login para continuar.",
+            );
+            router.push("/sign-in");
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message || "Erro ao criar conta");
+          },
+        },
+      );
     } catch (error) {
       toast.error("Ocorreu um erro inesperado");
     } finally {
@@ -98,7 +103,11 @@ export function SignUpForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Criar Conta"}
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Criar Conta"
+          )}
         </Button>
       </form>
     </Form>

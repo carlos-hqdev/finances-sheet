@@ -1,9 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "@/shared/lib/auth-client";
-import { signInSchema, type SignInValues } from "../schemas";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Button } from "@/shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,11 +16,8 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
-import { Button } from "@/shared/components/ui/button";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { signIn } from "@/shared/lib/auth-client";
+import { type SignInValues, signInSchema } from "../schemas";
 
 export function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,20 +34,23 @@ export function SignInForm() {
   async function onSubmit(values: SignInValues) {
     setIsLoading(true);
     try {
-      await signIn.email({
-        email: values.email,
-        password: values.password,
-        callbackURL: "/",
-      }, {
-        onSuccess: () => {
-          toast.success("Login realizado com sucesso!");
-          router.push("/");
-          router.refresh();
+      await signIn.email(
+        {
+          email: values.email,
+          password: values.password,
+          callbackURL: "/",
         },
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Erro ao fazer login");
-        }
-      });
+        {
+          onSuccess: () => {
+            toast.success("Login realizado com sucesso!");
+            router.push("/");
+            router.refresh();
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message || "Erro ao fazer login");
+          },
+        },
+      );
     } catch (error) {
       toast.error("Ocorreu um erro inesperado");
     } finally {
@@ -85,7 +88,11 @@ export function SignInForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Entrar"}
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Entrar"
+          )}
         </Button>
       </form>
     </Form>

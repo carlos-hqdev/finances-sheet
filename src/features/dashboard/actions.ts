@@ -61,9 +61,9 @@ export async function getUserSidebarInfo(userId: string) {
 
   return {
     name: user?.name || "Usuário",
-    displayName: user?.displayName,
+    displayName: user?.displayName ?? null,
     email: user?.email || "",
-    image: user?.image,
+    image: user?.image ?? null,
     currentBalance,
     reserves: totalReserves,
     totalGoals,

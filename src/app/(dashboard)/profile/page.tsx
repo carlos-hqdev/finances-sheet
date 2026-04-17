@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession, authClient } from "@/shared/lib/auth-client";
+import { Camera, Loader2, Mail, Shield, User as UserIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { updateProfile } from "@/features/users";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,15 +13,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
-import { toast } from "sonner";
-import { User as UserIcon, Shield, Mail, Camera, Loader2 } from "lucide-react";
-import { updateProfile } from "@/features/users";
+import { authClient, useSession } from "@/shared/lib/auth-client";
 
 export default function ProfilePage() {
   const session = useSession();

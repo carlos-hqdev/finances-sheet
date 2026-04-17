@@ -12,7 +12,7 @@ export default function ReportsLoading() {
           <Skeleton className="h-10 w-32" />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-4">
         <Skeleton className="h-[400px] w-full rounded-xl" />
         <Skeleton className="h-[400px] w-full rounded-xl" />

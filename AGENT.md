@@ -162,6 +162,11 @@ pnpm prisma db push                      # Sync sem migration
 pnpm prisma studio                       # Interface visual
 
 # NÃO USE pnpm build para testar - apenas quando solicitado
+
+### Scripts de Teste
+- Scripts de teste/debug devem ser criados na pasta `scratch/` (não versionada)
+- Arquivos em `scratch/` estão no `.gitignore`
+- Para rodar scripts: `node scratch/meu-script.mjs` ou `tsx scratch/meu-script.ts`
 ```
 
 ---

@@ -1,8 +1,8 @@
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { AdminLayoutWrapper } from "@/shared/components/layout";
 import { getUserSidebarInfo } from "@/features/dashboard";
+import { AdminLayoutWrapper } from "@/shared/components/layout";
+import { auth } from "@/shared/lib/auth";
 
 export const dynamic = "force-dynamic";
 

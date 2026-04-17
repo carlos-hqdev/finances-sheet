@@ -1,8 +1,8 @@
-import { CreditCardActions, CreditCardDialog } from "@/features/credit-cards";
-import { prisma } from "@/shared/lib/db";
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { CreditCardActions, CreditCardDialog } from "@/features/credit-cards";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/db";
 
 export default async function CreditCardsPage() {
   const session = await auth.api.getSession({

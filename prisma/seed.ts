@@ -14,7 +14,8 @@ async function main() {
   await prisma.user.deleteMany();
 
   // Hash real da senha 'qwer1234' capturado do banco de dados (Better Auth scrypt format)
-  const realHash = "6757d4260edaf7f866188e0831510ad9:dfc3792b4895c498eb51646ba9bf79ea3e4f90c2724d87f3ecee8bb7642ecb7442faa9f37e6f3aefa674de683975188faa66a81f33b7e5d410970ba080e3e680";
+  const realHash =
+    "6757d4260edaf7f866188e0831510ad9:dfc3792b4895c498eb51646ba9bf79ea3e4f90c2724d87f3ecee8bb7642ecb7442faa9f37e6f3aefa674de683975188faa66a81f33b7e5d410970ba080e3e680";
 
   // 1. Criar Usuário Carlos
   console.log("Criando usuário Carlos...");
@@ -27,9 +28,9 @@ async function main() {
           providerId: "credential",
           accountId: "carlos@admin.dev", // Better Auth costuma usar o email como accountId em credentials
           password: realHash,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   // 2. Criar Usuário Henrique
@@ -43,16 +44,22 @@ async function main() {
           providerId: "credential",
           accountId: "henrique@admin.dev",
           password: realHash,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   // --------------------------------------------------------
   // DADOS DO CARLOS
   // --------------------------------------------------------
   console.log("Populando dados do Carlos...");
-  const categories = ["Alimentação", "Moradia", "Transporte", "Lazer", "Salário"];
+  const categories = [
+    "Alimentação",
+    "Moradia",
+    "Transporte",
+    "Lazer",
+    "Salário",
+  ];
   const categoryMapCarlos: Record<string, string> = {};
   for (const name of categories) {
     const cat = await prisma.category.create({
@@ -62,17 +69,27 @@ async function main() {
   }
 
   const bradesco = await prisma.bankAccount.create({
-    data: { userId: userCarlos.id, name: "Bradesco", type: "CHECKING", balance: 5000 },
+    data: {
+      userId: userCarlos.id,
+      name: "Bradesco",
+      type: "CHECKING",
+      balance: 5000,
+    },
   });
   const nubank = await prisma.bankAccount.create({
-    data: { userId: userCarlos.id, name: "Nubank", type: "CHECKING", balance: 2000 },
+    data: {
+      userId: userCarlos.id,
+      name: "Nubank",
+      type: "CHECKING",
+      balance: 2000,
+    },
   });
 
   for (let i = 0; i < 5; i++) {
     const date = new Date();
     date.setMonth(date.getMonth() - i);
     const ref = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    
+
     await prisma.transaction.create({
       data: {
         accountId: bradesco.id,
@@ -83,7 +100,7 @@ async function main() {
         description: "Salário Mensal Carlos",
         isPaid: true,
         referenceMonth: ref,
-      }
+      },
     });
 
     await prisma.transaction.create({
@@ -96,7 +113,7 @@ async function main() {
         description: "Supermercado Carlos",
         isPaid: true,
         referenceMonth: ref,
-      }
+      },
     });
   }
 
@@ -105,10 +122,20 @@ async function main() {
   // --------------------------------------------------------
   console.log("Populando dados do Henrique (Apenas bancos, sem transações)...");
   await prisma.bankAccount.create({
-    data: { userId: userHenrique.id, name: "Itaú", type: "CHECKING", balance: 10000 },
+    data: {
+      userId: userHenrique.id,
+      name: "Itaú",
+      type: "CHECKING",
+      balance: 10000,
+    },
   });
   await prisma.bankAccount.create({
-    data: { userId: userHenrique.id, name: "Inter", type: "CHECKING", balance: 500 },
+    data: {
+      userId: userHenrique.id,
+      name: "Inter",
+      type: "CHECKING",
+      balance: 500,
+    },
   });
 
   console.log("Seed concluído com sucesso!");

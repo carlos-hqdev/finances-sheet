@@ -3,11 +3,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  CheckCircle2,
-  Trash2,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Trash2, XCircle } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {

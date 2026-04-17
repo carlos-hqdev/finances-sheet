@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Bar,
   BarChart,
@@ -12,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 
 interface ComparisonData {

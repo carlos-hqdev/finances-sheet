@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+import { useEffect, useMemo, useState } from "react";
 import {
   Bar,
   CartesianGrid,
@@ -13,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 type MonthData = {
   month: string;

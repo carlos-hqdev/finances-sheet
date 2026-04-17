@@ -1,22 +1,30 @@
-import ofxParser from 'node-ofx-parser';
-import { ParsedTransaction } from '@/features/transactions/types';
-import { detectPaymentMethod, shouldIgnoreTransaction } from './import-utils';
+import ofxParser from "node-ofx-parser";
+import type { ParsedTransaction } from "@/features/transactions/types";
+import { detectPaymentMethod, shouldIgnoreTransaction } from "./import-utils";
 
 /**
  * Função para checar uma transação e determinar se parece uma transferência interna
  * baseada no CPF ou nome do usuário.
  */
-function isInternalTransfer(description: string, userDocumentOrName?: string): boolean {
-  if (!userDocumentOrName || userDocumentOrName.trim() === '') return false;
-  
-  const normalizedDesc = description.toLowerCase().replace(/[\.\-\/\s]/g, '');
-  const normalizedDoc = userDocumentOrName.toLowerCase().replace(/[\.\-\/\s]/g, '');
-  
+function isInternalTransfer(
+  description: string,
+  userDocumentOrName?: string,
+): boolean {
+  if (!userDocumentOrName || userDocumentOrName.trim() === "") return false;
+
+  const normalizedDesc = description.toLowerCase().replace(/[.\-/\s]/g, "");
+  const normalizedDoc = userDocumentOrName
+    .toLowerCase()
+    .replace(/[.\-/\s]/g, "");
+
   // Se encontrou o CPF/Nome na descricao, ou keywords como PIX com proprio cpf
   return normalizedDesc.includes(normalizedDoc);
 }
 
-export function parseOFX(rawContent: string, userDocument?: string): ParsedTransaction[] {
+export function parseOFX(
+  rawContent: string,
+  userDocument?: string,
+): ParsedTransaction[] {
   try {
     const data = ofxParser.parse(rawContent);
 
@@ -25,15 +33,15 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
     // or OFX.CREDITCARDMSGSRSV1... for CC
     const bankMsgRs = data.OFX.BANKMSGSRSV1;
     const ccMsgRs = data.OFX.CREDITCARDMSGSRSV1;
-    
+
     let stmtTrnRs: any = null;
     let isCC = false;
 
     if (bankMsgRs && bankMsgRs.STMTTRNRS) {
-       stmtTrnRs = bankMsgRs.STMTTRNRS;
+      stmtTrnRs = bankMsgRs.STMTTRNRS;
     } else if (ccMsgRs && ccMsgRs.CCSTMTTRNRS) {
-       stmtTrnRs = ccMsgRs.CCSTMTTRNRS;
-       isCC = true;
+      stmtTrnRs = ccMsgRs.CCSTMTTRNRS;
+      isCC = true;
     }
 
     if (!stmtTrnRs) {
@@ -42,28 +50,31 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
 
     // Fix for arrays vs object when only one transaction is present
     const rsArray = Array.isArray(stmtTrnRs) ? stmtTrnRs : [stmtTrnRs];
-    
+
     const parsedTransactions: ParsedTransaction[] = [];
 
     rsArray.forEach((rs: any) => {
       const stmtRs = isCC ? rs.CCSTMTRS : rs.STMTRS;
-      if (!stmtRs || !stmtRs.BANKTRANLIST || !stmtRs.BANKTRANLIST.STMTTRN) return;
-      
+      if (!stmtRs || !stmtRs.BANKTRANLIST || !stmtRs.BANKTRANLIST.STMTTRN)
+        return;
+
       const stmts = stmtRs.BANKTRANLIST.STMTTRN;
       const transactions = Array.isArray(stmts) ? stmts : [stmts];
 
       transactions.forEach((trn: any) => {
         // Date parsing: Format YYYYMMDDHHMMSS
         // E.g. "20230510100000"
-        let rawDate = typeof trn.DTPOSTED === 'string' ? trn.DTPOSTED : '';
-        if (rawDate.includes('[')) rawDate = rawDate.split('[')[0]; // discard timezone info for parsing simplicity
-        
+        let rawDate = typeof trn.DTPOSTED === "string" ? trn.DTPOSTED : "";
+        if (rawDate.includes("[")) rawDate = rawDate.split("[")[0]; // discard timezone info for parsing simplicity
+
         const year = parseInt(rawDate.substring(0, 4), 10);
         const month = parseInt(rawDate.substring(4, 6), 10) - 1;
         const day = parseInt(rawDate.substring(6, 8), 10);
-        
+
         // Se houver hora (opcional dependendo do banco)
-        let hours = 0, minutes = 0, seconds = 0;
+        let hours = 0,
+          minutes = 0,
+          seconds = 0;
         if (rawDate.length >= 14) {
           hours = parseInt(rawDate.substring(8, 10), 10);
           minutes = parseInt(rawDate.substring(10, 12), 10);
@@ -72,14 +83,20 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
 
         const date = new Date(year, month, day, hours, minutes, seconds);
         const amount = parseFloat(trn.TRNAMT);
-        let description = typeof trn.MEMO === 'string' ? trn.MEMO : (trn.NAME || "");
-        
-        if (!description || description.trim() === "" || description.trim().toUpperCase() === "LANÇAMENTO" || description.trim().toUpperCase() === "LANCAMENTO") {
+        let description =
+          typeof trn.MEMO === "string" ? trn.MEMO : trn.NAME || "";
+
+        if (
+          !description ||
+          description.trim() === "" ||
+          description.trim().toUpperCase() === "LANÇAMENTO" ||
+          description.trim().toUpperCase() === "LANCAMENTO"
+        ) {
           const id = trn.FITID || trn.REFNUM || "";
           const suffix = id ? ` (ID: ${id.toString().slice(-5)})` : "";
           description = `[A Verificar] Lançamento sem descrição base${suffix}`;
         }
-        
+
         // Skip unwanted transactions (fees, summaries, etc.)
         if (shouldIgnoreTransaction(description)) return;
 
@@ -91,7 +108,7 @@ export function parseOFX(rawContent: string, userDocument?: string): ParsedTrans
           date,
           amount,
           description,
-          type: internal ? "TRANSFER" : (amount < 0 ? "EXPENSE" : "INCOME"),
+          type: internal ? "TRANSFER" : amount < 0 ? "EXPENSE" : "INCOME",
           isInternalTransfer: internal,
           paymentMethod: detectPaymentMethod(description),
         });

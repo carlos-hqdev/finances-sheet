@@ -1,7 +1,7 @@
-import { AccountForm, AccountList } from "@/features/accounts";
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { AccountForm, AccountList } from "@/features/accounts";
+import { auth } from "@/shared/lib/auth";
 
 export default async function AccountsPage() {
   const session = await auth.api.getSession({

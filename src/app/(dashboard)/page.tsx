@@ -1,4 +1,6 @@
 import { CreditCard, PiggyBank, TrendingUp, Wallet } from "lucide-react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   CashFlowChart,
   DashboardMonthPicker,
@@ -15,8 +17,6 @@ import {
   YearlyComparisonChart,
 } from "@/features/dashboard";
 import { auth } from "@/shared/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 interface PageProps {
   searchParams: Promise<{

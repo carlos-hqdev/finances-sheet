@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/shared/lib/db";
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/db";
 
 export async function createCreditCard(data: {
   accountId: string;
@@ -24,7 +24,8 @@ export async function createCreditCard(data: {
     const account = await prisma.bankAccount.findUnique({
       where: { id: data.accountId, userId },
     });
-    if (!account) throw new Error("Conta não encontrada ou não pertence ao usuário");
+    if (!account)
+      throw new Error("Conta não encontrada ou não pertence ao usuário");
 
     await prisma.creditCard.create({
       data: {
@@ -64,14 +65,16 @@ export async function updateCreditCard(
     const card = await prisma.creditCard.findFirst({
       where: { id, account: { userId } },
     });
-    if (!card) throw new Error("Cartão não encontrado ou não pertence ao usuário");
+    if (!card)
+      throw new Error("Cartão não encontrado ou não pertence ao usuário");
 
     // Se mudou a conta, verificar a nova conta
     if (data.accountId !== card.accountId) {
       const account = await prisma.bankAccount.findUnique({
         where: { id: data.accountId, userId },
       });
-      if (!account) throw new Error("Nova conta não encontrada ou não pertence ao usuário");
+      if (!account)
+        throw new Error("Nova conta não encontrada ou não pertence ao usuário");
     }
 
     await prisma.creditCard.update({
@@ -105,7 +108,8 @@ export async function deleteCreditCard(id: string) {
     const card = await prisma.creditCard.findFirst({
       where: { id, account: { userId } },
     });
-    if (!card) throw new Error("Cartão não encontrado ou não pertence ao usuário");
+    if (!card)
+      throw new Error("Cartão não encontrado ou não pertence ao usuário");
 
     await prisma.creditCard.delete({
       where: { id },

@@ -12,7 +12,7 @@ export default function InvestmentsLoading() {
           <Skeleton className="h-10 w-32" />
         </div>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-[180px] w-full rounded-xl" />

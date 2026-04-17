@@ -1,8 +1,8 @@
 "use server";
 
-import { prisma } from "@/shared/lib/db";
-import { auth } from "@/shared/lib/auth";
 import { headers } from "next/headers";
+import { auth } from "@/shared/lib/auth";
+import { prisma } from "@/shared/lib/db";
 
 export async function getAggregatedTransactions(
   userId: string,

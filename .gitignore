@@ -43,3 +43,6 @@ next-env.d.ts
 # ignored output logs and txt files
 *.log
 *.txt
+
+# testing and scratch scripts
+scratch/
