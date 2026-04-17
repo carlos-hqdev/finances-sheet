@@ -1,10 +1,36 @@
+import { auth } from "@/shared/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { AdminLayoutWrapper } from "@/shared/components/layout";
+import { getUserSidebarInfo } from "@/features/dashboard";
 
 export const dynamic = "force-dynamic";
-export default function DashboardGroupLayout({
+
+export default async function DashboardGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminLayoutWrapper>{children}</AdminLayoutWrapper>;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return redirect("/sign-in");
+  }
+
+  const sidebarInfo = await getUserSidebarInfo(session.user.id);
+
+  const user = {
+    ...session.user,
+    image: session.user.image ?? null,
+    displayName: session.user.displayName ?? null,
+    cpf: session.user.cpf ?? null,
+  };
+
+  return (
+    <AdminLayoutWrapper user={user} sidebarInfo={sidebarInfo}>
+      {children}
+    </AdminLayoutWrapper>
+  );
 }

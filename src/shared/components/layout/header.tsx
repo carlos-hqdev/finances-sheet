@@ -73,25 +73,22 @@ export default function Header({
               variant="ghost"
               size="icon"
               className="text-muted-foreground hover:text-primary transition-colors outline-none"
-              title={user?.displayName || user?.name || "Perfil"}
             >
-              <UserIcon className="h-5 w-5" />
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xs font-bold text-primary">
+                  {(user?.displayName || user?.name || "U")
+                    .substring(0, 2)
+                    .toUpperCase()}
+                </span>
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {user?.displayName || user?.name || "Usuário"}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email || "guest@example.com"}
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/profile" className="cursor-pointer flex items-center gap-2">
+              <Link
+                href="/profile"
+                className="cursor-pointer flex items-center gap-2"
+              >
                 <UserIcon className="h-4 w-4" />
                 <span>Perfil</span>
               </Link>

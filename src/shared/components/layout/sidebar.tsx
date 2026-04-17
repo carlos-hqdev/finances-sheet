@@ -1,6 +1,5 @@
 "use client";
 
-import type { User } from "@prisma/client";
 import {
   ArrowRightLeft,
   BarChart,
@@ -8,22 +7,16 @@ import {
   LayoutDashboard,
   Settings,
   Wallet,
+  PiggyBank,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
-import { signOut } from "@/shared/lib/auth-client";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
-import { LogOut, User as UserIcon } from "lucide-react";
-
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import type { SidebarInfo } from "./admin-layout-wrapper";
 
 interface NavItem {
   name: string;
@@ -66,37 +59,65 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-// Extend User to allow extra props if needed, though mostly standard User is fine
-type SidebarUser = User;
-
 interface SidebarProps {
-  user?: SidebarUser;
   isCollapsed: boolean;
   isMobileMenuOpen?: boolean;
   onCloseMobile?: () => void;
+  sidebarInfo?: SidebarInfo;
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function SummaryItem({
+  icon: Icon,
+  label,
+  value,
+  color,
+  isCollapsed,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  color: string;
+  isCollapsed: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 text-xs",
+        isCollapsed && "justify-center",
+      )}
+    >
+      <Icon className={cn("h-4 w-4 shrink-0", color)} />
+      {!isCollapsed && (
+        <>
+          <span className="flex-1 truncate text-muted-foreground">{label}</span>
+          <span className={cn("font-semibold", color)}>{value}</span>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function Sidebar({
-  user,
   isCollapsed,
   isMobileMenuOpen,
   onCloseMobile,
+  sidebarInfo,
 }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Handle potential null/undefined name
-  const firstName = user?.name ? user.name.split(" ")[0] : "Usuário";
-
-  const handleSignOut = async () => {
-    await signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/sign-in");
-        },
-      },
-    });
-  };
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   return (
     <div
@@ -171,60 +192,44 @@ export default function Sidebar({
       </nav>
 
       <div className="p-4 border-t border-sidebar-border">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className={cn(
-                "block rounded-lg  border border-sidebar-border p-3 mb-2 transition-all hover:bg-sidebar-accent cursor-pointer outline-none w-full text-left",
-                isCollapsed ? "flex justify-center" : "",
-              )}
-            >
-              <div className="flex items-center gap-3">
-                {user?.name ? (
-                  <div suppressHydrationWarning className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
-                    {firstName.substring(0, 2).toUpperCase()}
-                  </div>
-                ) : (
-                  <div suppressHydrationWarning className="h-8 w-8 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-bold text-xs shrink-0">
-                    U
-                  </div>
-                )}
-                {!isCollapsed && (
-                  <div className="flex-1 overflow-hidden">
-                    <p suppressHydrationWarning className="text-sm font-medium truncate text-sidebar-foreground">
-                      {user?.name || "Convidado"}
-                    </p>
-                    <p suppressHydrationWarning className="text-xs text-muted-foreground truncate">
-                      {user?.email || "guest@example.com"}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            side={isCollapsed ? "right" : "top"}
-            align={isCollapsed ? "start" : "end"}
-            className="w-56"
-          >
-            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/settings" className="cursor-pointer flex items-center gap-2">
-                <UserIcon className="h-4 w-4" />
-                <span>Perfil</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive cursor-pointer flex items-center gap-2"
-              onClick={handleSignOut}
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sair</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {!isLoaded ? (
+          <div className="space-y-2">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-6 w-full" />
+            ))}
+          </div>
+        ) : sidebarInfo ? (
+          <div className="space-y-2">
+            <SummaryItem
+              icon={Wallet}
+              label="Saldo"
+              value={formatCurrency(sidebarInfo.currentBalance)}
+              color="text-emerald-500"
+              isCollapsed={isCollapsed}
+            />
+            <SummaryItem
+              icon={TrendingUp}
+              label="Saídas"
+              value={formatCurrency(sidebarInfo.monthlyExpenses)}
+              color="text-red-500"
+              isCollapsed={isCollapsed}
+            />
+            <SummaryItem
+              icon={Target}
+              label="Metas"
+              value={formatCurrency(sidebarInfo.totalGoals)}
+              color="text-blue-500"
+              isCollapsed={isCollapsed}
+            />
+            <SummaryItem
+              icon={PiggyBank}
+              label="Reservas"
+              value={formatCurrency(sidebarInfo.reserves)}
+              color="text-amber-500"
+              isCollapsed={isCollapsed}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

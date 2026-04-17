@@ -169,68 +169,69 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="flex-1" style={{ minHeight: 220 }}>
+      <div className="flex-1" style={{ height: 280 }}>
         {!isMounted ? (
-          <Skeleton className="w-full h-full min-h-[220px]" />
+          <Skeleton className="w-full h-full" style={{ height: 280 }} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={280}>
             <ComposedChart
-            data={chartData}
-            margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
-          >
-            {/* stroke com opacidade neutra — funciona nos dois temas */}
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="currentColor"
-              className="text-border"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="label"
-              tick={<XAxisTick />}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={<YAxisTick />}
-              axisLine={false}
-              tickLine={false}
-              width={78}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: "currentColor", opacity: 0.05 }}
-            />
-            <Legend
-              formatter={(value) => (
-                <span className="text-muted-foreground text-xs">{value}</span>
-              )}
-            />
-            <Bar
-              dataKey="income"
-              name="Receita"
-              fill="#22c55e"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={28}
-            />
-            <Bar
-              dataKey="expense"
-              name="Despesa"
-              fill="#ef4444"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={28}
-            />
-            <Line
-              type="monotone"
-              dataKey="result"
-              name="Resultado"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={{ r: 3, fill: "#3b82f6" }}
-              activeDot={{ r: 5 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+              data={chartData}
+              margin={{ top: 4, right: 8, bottom: 32, left: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="currentColor"
+                className="text-border"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="label"
+                tick={<XAxisTick />}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={<YAxisTick />}
+                axisLine={false}
+                tickLine={false}
+                width={78}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ fill: "currentColor", opacity: 0.05 }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                formatter={(value) => (
+                  <span className="text-muted-foreground text-xs">{value}</span>
+                )}
+              />
+              <Bar
+                dataKey="income"
+                name="Receita"
+                fill="#22c55e"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={28}
+              />
+              <Bar
+                dataKey="expense"
+                name="Despesa"
+                fill="#ef4444"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={28}
+              />
+              <Line
+                type="monotone"
+                dataKey="result"
+                name="Resultado"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={{ r: 3, fill: "#3b82f6" }}
+                activeDot={{ r: 5 }}
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
         )}
       </div>
     </div>

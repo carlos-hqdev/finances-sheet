@@ -4,12 +4,10 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   AlertCircle,
-  ChevronRight,
   DownloadCloud,
   FileSearch,
   Pencil,
   UploadCloud,
-  X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -146,7 +144,9 @@ export function ImportTransactionsDialog({
       setStep(2);
       toast.success(`${allTransactions.length} transações identificadas!`);
     } else {
-      toast.warning("Nenhuma transação foi identificada no(s) arquivo(s) selecionado(s).");
+      toast.warning(
+        "Nenhuma transação foi identificada no(s) arquivo(s) selecionado(s).",
+      );
     }
     setIsLoading(false);
     setProcessingStatus("");
@@ -161,15 +161,21 @@ export function ImportTransactionsDialog({
 
       if (selectedFile.name.toLowerCase().endsWith(".ofx")) {
         const text = await selectedFile.text();
-        data = parseOFX(text, cpf).map(t => ({ ...t, source: selectedFile.name }));
+        data = parseOFX(text, cpf).map((t) => ({
+          ...t,
+          source: selectedFile.name,
+        }));
       } else if (selectedFile.name.toLowerCase().endsWith(".csv")) {
         const text = await selectedFile.text();
         const parsed = await parseCSV(text, cpf);
-        data = parsed.map(t => ({ ...t, source: selectedFile.name }));
+        data = parsed.map((t) => ({ ...t, source: selectedFile.name }));
       } else if (selectedFile.name.toLowerCase().endsWith(".pdf")) {
         try {
           const arrayBuffer = await selectedFile.arrayBuffer();
-          data = (await parsePdfFile(arrayBuffer, cpf, password)).map(t => ({ ...t, source: selectedFile.name }));
+          data = (await parsePdfFile(arrayBuffer, cpf, password)).map((t) => ({
+            ...t,
+            source: selectedFile.name,
+          }));
         } catch (err: any) {
           if (err.name === "PasswordException") {
             return { isPasswordRequired: true };
@@ -211,7 +217,9 @@ export function ImportTransactionsDialog({
       setStep(2);
       toast.success(`${allTransactions.length} transações identificadas!`);
     } else {
-      toast.warning("Nenhuma transação foi identificada no(s) arquivo(s) selecionado(s).");
+      toast.warning(
+        "Nenhuma transação foi identificada no(s) arquivo(s) selecionado(s).",
+      );
     }
     setIsLoading(false);
     setProcessingStatus("");
@@ -247,8 +255,8 @@ export function ImportTransactionsDialog({
   };
 
   const handleApplyMatch = (matchId: string, suggestedDescription: string) => {
-     handleUpdateItem(matchId, { description: suggestedDescription });
-     toast.success("Descrição atualizada com base no confronto de arquivos!");
+    handleUpdateItem(matchId, { description: suggestedDescription });
+    toast.success("Descrição atualizada com base no confronto de arquivos!");
   };
 
   const groupedData = useMemo(() => {
@@ -291,26 +299,31 @@ export function ImportTransactionsDialog({
 
   // Encontrar sugestões de merge (mesmo valor e data, arquivos diferentes)
   const matchSuggestions = useMemo(() => {
-    const suggestions: Record<string, { suggestedDescription: string, fromFile: string }> = {};
-    
-    parsedData.forEach(target => {
-       // Procurar alguém com mesmo valor e data em arquivo diferente
-       const match = parsedData.find(other => 
-         other.id !== target.id && 
-         other.amount === target.amount &&
-         format(other.date, "yyyy-MM-dd") === format(target.date, "yyyy-MM-dd") &&
-         other.source !== target.source &&
-         other.description.length > target.description.length // Sugerir a maior descrição
-       );
+    const suggestions: Record<
+      string,
+      { suggestedDescription: string; fromFile: string }
+    > = {};
 
-       if (match) {
-         suggestions[target.id] = {
-           suggestedDescription: match.description,
-           fromFile: match.source || "outro arquivo"
-         };
-       }
+    parsedData.forEach((target) => {
+      // Procurar alguém com mesmo valor e data em arquivo diferente
+      const match = parsedData.find(
+        (other) =>
+          other.id !== target.id &&
+          other.amount === target.amount &&
+          format(other.date, "yyyy-MM-dd") ===
+            format(target.date, "yyyy-MM-dd") &&
+          other.source !== target.source &&
+          other.description.length > target.description.length, // Sugerir a maior descrição
+      );
+
+      if (match) {
+        suggestions[target.id] = {
+          suggestedDescription: match.description,
+          fromFile: match.source || "outro arquivo",
+        };
+      }
     });
-    
+
     return suggestions;
   }, [parsedData]);
 
@@ -419,7 +432,11 @@ export function ImportTransactionsDialog({
               </Label>
               <div
                 className={`relative border-2 border-dashed rounded-xl p-10 text-center transition-all
-                         ${selectedAccountId ? "border-primary/40 hover:border-primary hover:bg-primary/5 cursor-pointer group" : "border-border/50 bg-muted/20 opacity-50 cursor-not-allowed"}`}
+                         ${
+                           selectedAccountId
+                             ? "border-primary/40 hover:border-primary hover:bg-primary/5 cursor-pointer group"
+                             : "border-border/50 bg-muted/20 opacity-50 cursor-not-allowed"
+                         }`}
               >
                 <input
                   ref={fileInputRef}
@@ -507,28 +524,30 @@ export function ImportTransactionsDialog({
                       <div className="flex items-center gap-2 group/title">
                         {editingGroup === group.description ? (
                           <div className="flex items-center gap-2 w-full pr-4">
-                             <Input 
-                               autoFocus
-                               value={editValue}
-                               onChange={(e) => setEditValue(e.target.value)}
-                               className="h-7 text-xs"
-                               onKeyDown={(e) => {
-                                 if (e.key === 'Enter') {
-                                   handleUpdateGroup(group.description, { description: editValue });
-                                   setEditingGroup(null);
-                                 }
-                               }}
-                               onBlur={() => setEditingGroup(null)}
-                             />
+                            <Input
+                              autoFocus
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="h-7 text-xs"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  handleUpdateGroup(group.description, {
+                                    description: editValue,
+                                  });
+                                  setEditingGroup(null);
+                                }
+                              }}
+                              onBlur={() => setEditingGroup(null)}
+                            />
                           </div>
                         ) : (
                           <>
                             <span className="font-semibold text-foreground text-sm leading-tight">
                               {group.description}
                             </span>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-5 w-5 opacity-0 group-hover/title:opacity-100 transition-opacity"
                               onClick={() => {
                                 setEditingGroup(group.description);
@@ -554,7 +573,7 @@ export function ImportTransactionsDialog({
                         }).format(Math.abs(group.totalAmount))}
                       </span>
                     </div>
-                    <div className="w-[140px] shrink-0">
+                    <div className="w-35 shrink-0">
                       <Select
                         value={group.type}
                         onValueChange={(val: any) =>
@@ -573,7 +592,7 @@ export function ImportTransactionsDialog({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="w-[220px] col-span-3">
+                    <div className="w-55 col-span-3">
                       {group.type === "TRANSFER" ? (
                         <Select
                           value={group.destinationAccountId || ""}
@@ -618,11 +637,13 @@ export function ImportTransactionsDialog({
                         </Select>
                       )}
                     </div>
-                    <div className="w-[140px] shrink-0">
+                    <div className="w-35 shrink-0">
                       <Select
                         value={group.paymentMethod}
                         onValueChange={(val: any) =>
-                          handleUpdateGroup(group.description, { paymentMethod: val })
+                          handleUpdateGroup(group.description, {
+                            paymentMethod: val,
+                          })
                         }
                       >
                         <SelectTrigger className="h-8 text-[10px] font-bold uppercase bg-muted/50 border-none w-full">
@@ -633,7 +654,9 @@ export function ImportTransactionsDialog({
                           <SelectItem value="DEBIT_CARD">Débito</SelectItem>
                           <SelectItem value="CREDIT_CARD">Crédito</SelectItem>
                           <SelectItem value="BOLETO">Boleto</SelectItem>
-                          <SelectItem value="TRANSFER">Transferência</SelectItem>
+                          <SelectItem value="TRANSFER">
+                            Transferência
+                          </SelectItem>
                           <SelectItem value="CASH">Dinheiro</SelectItem>
                           <SelectItem value="OTHER">Outro</SelectItem>
                         </SelectContent>
@@ -663,27 +686,29 @@ export function ImportTransactionsDialog({
                           </span>
                           <div className="flex items-center gap-1 group/desc">
                             {editingId === trx.id ? (
-                               <Input 
-                                 autoFocus
-                                 value={editValue}
-                                 onChange={(e) => setEditValue(e.target.value)}
-                                 className="h-6 text-[10px] w-48"
-                                 onKeyDown={(e) => {
-                                   if (e.key === 'Enter') {
-                                     handleUpdateItem(trx.id, { description: editValue });
-                                     setEditingId(null);
-                                   }
-                                 }}
-                                 onBlur={() => setEditingId(null)}
-                               />
+                              <Input
+                                autoFocus
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="h-6 text-[10px] w-48"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    handleUpdateItem(trx.id, {
+                                      description: editValue,
+                                    });
+                                    setEditingId(null);
+                                  }
+                                }}
+                                onBlur={() => setEditingId(null)}
+                              />
                             ) : (
                               <>
-                                <span className="text-[11px] font-semibold text-foreground truncate max-w-[200px]">
+                                <span className="text-[11px] font-semibold text-foreground truncate max-w-50">
                                   {trx.description}
                                 </span>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                   className="h-4 w-4 opacity-0 group-hover/desc:opacity-100 transition-opacity"
                                   onClick={() => {
                                     setEditingId(trx.id);
@@ -700,7 +725,12 @@ export function ImportTransactionsDialog({
                               variant="outline"
                               size="sm"
                               className="h-6 px-2 text-[9px] gap-1 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
-                              onClick={() => handleApplyMatch(trx.id, matchSuggestions[trx.id].suggestedDescription)}
+                              onClick={() =>
+                                handleApplyMatch(
+                                  trx.id,
+                                  matchSuggestions[trx.id].suggestedDescription,
+                                )
+                              }
                             >
                               <FileSearch className="h-3 w-3" />
                               Confrontar PDF
@@ -708,7 +738,7 @@ export function ImportTransactionsDialog({
                           )}
                         </div>
                       </div>
-                      <div className="w-[110px] text-right shrink-0">
+                      <div className="w-27.5 text-right shrink-0">
                         <span
                           className={`font-bold text-sm ${trx.amount < 0 ? "text-red-500" : "text-emerald-500"}`}
                         >
@@ -718,7 +748,7 @@ export function ImportTransactionsDialog({
                           }).format(Math.abs(trx.amount))}
                         </span>
                       </div>
-                      <div className="w-[130px] shrink-0">
+                      <div className="w-32.5 shrink-0">
                         <Select
                           value={trx.type}
                           onValueChange={(val: any) =>
@@ -740,7 +770,7 @@ export function ImportTransactionsDialog({
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="w-[180px] shrink-0">
+                      <div className="w-45 shrink-0">
                         {trx.type === "TRANSFER" ? (
                           <Select
                             value={trx.destinationAccountId || ""}
@@ -783,7 +813,7 @@ export function ImportTransactionsDialog({
                           </Select>
                         )}
                       </div>
-                      <div className="w-[130px] shrink-0">
+                      <div className="w-32.5 shrink-0">
                         <Select
                           value={trx.paymentMethod || "OTHER"}
                           onValueChange={(val: any) =>
@@ -798,7 +828,9 @@ export function ImportTransactionsDialog({
                             <SelectItem value="DEBIT_CARD">Débito</SelectItem>
                             <SelectItem value="CREDIT_CARD">Crédito</SelectItem>
                             <SelectItem value="BOLETO">Boleto</SelectItem>
-                            <SelectItem value="TRANSFER">Transferência</SelectItem>
+                            <SelectItem value="TRANSFER">
+                              Transferência
+                            </SelectItem>
                             <SelectItem value="CASH">Dinheiro</SelectItem>
                             <SelectItem value="OTHER">Outro</SelectItem>
                           </SelectContent>

@@ -2,7 +2,7 @@
 
 import { CalendarDays } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Select,
   SelectContent,
@@ -38,6 +38,18 @@ export function DashboardMonthPicker({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [mounted, setMounted] = useState(false);
+  const [currentRef, setCurrentRef] = useState<string>("");
+  const [currentYear, setCurrentYear] = useState<string>("");
+
+  useEffect(() => {
+    const now = new Date();
+    setCurrentRef(
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`,
+    );
+    setCurrentYear(now.getFullYear().toString());
+    setMounted(true);
+  }, []);
 
   const handleMonthChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -58,13 +70,11 @@ export function DashboardMonthPicker({
     return MONTH_NAMES[month] || ref;
   };
 
-  const now = new Date();
-  const currentRef = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const currentYear = now.getFullYear().toString();
-
-  const currentYearMonths = availableMonths.filter(
-    (m) => m.startsWith(currentYear) && m !== currentRef,
-  );
+  const currentYearMonths = mounted
+    ? availableMonths.filter(
+        (m) => m.startsWith(currentYear) && m !== currentRef,
+      )
+    : [];
 
   return (
     <div className="flex items-center gap-2">
@@ -74,18 +84,19 @@ export function DashboardMonthPicker({
       <Select
         defaultValue={currentMonth || "current"}
         onValueChange={handleMonthChange}
-        disabled={isPending}
+        disabled={isPending || !mounted}
       >
         <SelectTrigger className="w-45 bg-card border-border font-medium">
           <SelectValue placeholder="Selecione o mês" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="current">Mês Atual</SelectItem>
-          {currentYearMonths.map((m) => (
-            <SelectItem key={m} value={m}>
-              {formatLabel(m)}
-            </SelectItem>
-          ))}
+          {mounted &&
+            currentYearMonths.map((m) => (
+              <SelectItem key={m} value={m}>
+                {formatLabel(m)}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     </div>

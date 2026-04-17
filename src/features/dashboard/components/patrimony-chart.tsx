@@ -62,32 +62,32 @@ export function PatrimonyChart({ data }: PatrimonyChartProps) {
   return (
     <div className="flex flex-col h-full gap-4">
       {/* Donut */}
-      <div className="flex-1" style={{ minHeight: 180 }}>
+      <div className="flex-1" style={{ height: 220 }}>
         {!isMounted ? (
-          <Skeleton className="w-full h-full min-h-[180px]" />
+          <Skeleton className="w-full h-full" style={{ height: 220 }} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-            <Pie
-              data={dataWithPct}
-              cx="50%"
-              cy="50%"
-              innerRadius="55%"
-              outerRadius="80%"
-              paddingAngle={3}
-              dataKey="value"
-            >
-              {dataWithPct.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={entry.color}
-                  stroke="transparent"
-                />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-          </PieChart>
-        </ResponsiveContainer>
+              <Pie
+                data={dataWithPct}
+                cx="50%"
+                cy="50%"
+                innerRadius="55%"
+                outerRadius="80%"
+                paddingAngle={3}
+                dataKey="value"
+              >
+                {dataWithPct.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color}
+                    stroke="transparent"
+                  />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
         )}
       </div>
 

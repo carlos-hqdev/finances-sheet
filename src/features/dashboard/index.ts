@@ -3,6 +3,7 @@ export {
   getCurrentMonthTransactions,
   getDashboardBalances,
   getPatrimonyBreakdown,
+  getUserSidebarInfo,
   getYearlyComparison,
   getYearlyPeriodComparison,
 } from "./actions";

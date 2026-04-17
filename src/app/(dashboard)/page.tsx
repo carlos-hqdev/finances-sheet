@@ -109,14 +109,14 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Bento Grid — Gráficos Principais */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <div className="md:col-span-2 bg-card rounded-xl border border-border p-6 flex flex-col min-h-95">
+        <div className="md:col-span-2 bg-card rounded-xl border border-border p-6 flex flex-col h-[420px]">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Fluxo de Caixa
           </h3>
           <CashFlowChart data={cashFlowData} />
         </div>
 
-        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-95">
+        <div className="bg-card rounded-xl border border-border p-6 flex flex-col h-[420px]">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Distribuição do Patrimônio
           </h3>
@@ -126,7 +126,7 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Comparativo Anual Simples */}
       <div className="grid grid-cols-1 gap-4 mt-4">
-        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-100">
+        <div className="bg-card rounded-xl border border-border p-6 flex flex-col h-[400px]">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Evolução Mensal (Comparativo Simples)
           </h3>
@@ -139,7 +139,7 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Análise por Períodos (Trimestres/Semestres) */}
       <div className="grid grid-cols-1 gap-4 mt-4">
-        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-150">
+        <div className="bg-card rounded-xl border border-border p-6 flex flex-col min-h-[500px]">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Análise por Períodos Agregados (Trimestres / Semestres)
           </h3>

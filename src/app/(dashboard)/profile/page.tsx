@@ -13,7 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import { toast } from "sonner";
 import { User as UserIcon, Shield, Mail, Camera, Loader2 } from "lucide-react";
 import { updateProfile } from "@/features/users";
@@ -103,7 +108,11 @@ export default function ProfilePage() {
       if (error) throw new Error(error.message);
 
       toast.success("Senha alterada com sucesso!");
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (error: any) {
       toast.error(error.message || "Erro ao alterar senha");
     } finally {
@@ -111,17 +120,28 @@ export default function ProfilePage() {
     }
   };
 
-  if (session.isPending) return <div className="p-8 flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!user) return <div className="p-8 text-center">Usuário não autenticado.</div>;
+  if (session.isPending)
+    return (
+      <div className="p-8 flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  if (!user)
+    return <div className="p-8 text-center">Usuário não autenticado.</div>;
 
-  const displayNameToDisplay = profileData.displayName || profileData.name || "Usuário";
+  const displayNameToDisplay =
+    profileData.displayName || profileData.name || "Usuário";
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Olá, {displayNameToDisplay}!</h1>
-          <p className="text-muted-foreground">Gerencie suas informações de conta e segurança.</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Olá, {displayNameToDisplay}!
+          </h1>
+          <p className="text-muted-foreground">
+            Gerencie suas informações de conta e segurança.
+          </p>
         </div>
       </div>
 
@@ -163,7 +183,7 @@ export default function ProfilePage() {
                         )}
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                         <Camera className="h-6 w-6 text-white drop-shadow-md" />
+                        <Camera className="h-6 w-6 text-white drop-shadow-md" />
                       </div>
                     </div>
                   </div>
@@ -175,7 +195,12 @@ export default function ProfilePage() {
                         id="image"
                         placeholder="https://exemplo.com/foto.jpg"
                         value={profileData.image}
-                        onChange={(e) => setProfileData({ ...profileData, image: e.target.value })}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            image: e.target.value,
+                          })
+                        }
                         className="bg-background/50 border-muted-foreground/20 focus:border-primary"
                       />
                     </div>
@@ -184,7 +209,12 @@ export default function ProfilePage() {
                       <Input
                         id="name"
                         value={profileData.name}
-                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            name: e.target.value,
+                          })
+                        }
                         className="bg-background/50 border-muted-foreground/20 focus:border-primary"
                         required
                       />
@@ -195,11 +225,17 @@ export default function ProfilePage() {
                         id="displayName"
                         placeholder="Como quer ser chamado?"
                         value={profileData.displayName}
-                        onChange={(e) => setProfileData({ ...profileData, displayName: e.target.value })}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            displayName: e.target.value,
+                          })
+                        }
                         className="bg-background/50 border-muted-foreground/20 focus:border-primary"
                       />
                       <p className="text-[10px] text-muted-foreground">
-                        Se vazio, usaremos seu nome completo: <strong>{profileData.name}</strong>
+                        Se vazio, usaremos seu nome completo:{" "}
+                        <strong>{profileData.name}</strong>
                       </p>
                     </div>
                     <div className="grid gap-2">
@@ -208,11 +244,17 @@ export default function ProfilePage() {
                         id="cpf"
                         placeholder="___.___.___-__"
                         value={profileData.cpf}
-                        onChange={(e) => setProfileData({ ...profileData, cpf: e.target.value })}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            cpf: e.target.value,
+                          })
+                        }
                         className="bg-background/50 border-muted-foreground/20 focus:border-primary"
                       />
                       <p className="text-[10px] text-muted-foreground">
-                        Usado para ajudar o sistema a reconhecer transferências internas em importação de arquivo.
+                        Usado para ajudar o sistema a reconhecer transferências
+                        internas em importação de arquivo.
                       </p>
                     </div>
                     <div className="grid gap-2">
@@ -223,7 +265,12 @@ export default function ProfilePage() {
                           id="email"
                           type="email"
                           value={profileData.email}
-                          onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              email: e.target.value,
+                            })
+                          }
                           className="pl-10 bg-background/50 border-muted-foreground/20 focus:border-primary"
                           required
                         />
@@ -232,9 +279,17 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="bg-muted/30 px-6 py-4 flex justify-end">
-                <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]">
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
+              <CardFooter className="bg-card/50 px-6 py-4 flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Salvar Alterações"
+                  )}
                 </Button>
               </CardFooter>
             </form>
@@ -257,7 +312,12 @@ export default function ProfilePage() {
                     id="currentPassword"
                     type="password"
                     value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
                     required
                     className="bg-background/50 border-muted-foreground/20"
                   />
@@ -268,7 +328,12 @@ export default function ProfilePage() {
                     id="newPassword"
                     type="password"
                     value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
                     required
                     className="bg-background/50 border-muted-foreground/20"
                   />
@@ -279,15 +344,29 @@ export default function ProfilePage() {
                     id="confirmPassword"
                     type="password"
                     value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     required
                     className="bg-background/50 border-muted-foreground/20"
                   />
                 </div>
               </CardContent>
-              <CardFooter className="bg-muted/30 px-6 py-4 flex justify-end">
-                <Button type="submit" variant="destructive" disabled={isLoading} className="min-w-[120px]">
-                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Atualizar Senha"}
+              <CardFooter className="bg-card/50 px-6 py-4 flex justify-end">
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={isLoading}
+                  className="min-w-[120px]"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Atualizar Senha"
+                  )}
                 </Button>
               </CardFooter>
             </form>

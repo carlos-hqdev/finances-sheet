@@ -78,12 +78,14 @@ export function PeriodComparisonAnalysis({
   type,
 }: PeriodComparisonProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [years, setYears] = useState<number[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     setIsMounted(true);
+    setYears(Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i));
   }, []);
 
   const updateParam = (key: string, value: string) => {
@@ -93,11 +95,6 @@ export function PeriodComparisonAnalysis({
       router.push(`?${params.toString()}`, { scroll: false });
     });
   };
-
-  const years = Array.from(
-    { length: 5 },
-    (_, i) => new Date().getFullYear() - i,
-  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,17 +108,18 @@ export function PeriodComparisonAnalysis({
             <Select
               value={String(targetYear)}
               onValueChange={(v) => updateParam("targetYear", v)}
-              disabled={isPending}
+              disabled={isPending || !isMounted}
             >
               <SelectTrigger className="w-25 bg-card h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {years.map((y) => (
-                  <SelectItem key={y} value={String(y)}>
-                    {y}
-                  </SelectItem>
-                ))}
+                {isMounted &&
+                  years.map((y) => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -133,36 +131,36 @@ export function PeriodComparisonAnalysis({
             <Select
               value={String(baseYear)}
               onValueChange={(v) => updateParam("baseYear", v)}
-              disabled={isPending}
+              disabled={isPending || !isMounted}
             >
               <SelectTrigger className="w-25 bg-card h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {years.map((y) => (
-                  <SelectItem key={y} value={String(y)}>
-                    {y}
-                  </SelectItem>
-                ))}
+                {isMounted &&
+                  years.map((y) => (
+                    <SelectItem key={y} value={String(y)}>
+                      {y}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <div className={isPending ? "pointer-events-none opacity-50" : undefined}>
-        <Tabs
-          value={type}
-          onValueChange={(v) => updateParam("type", v)}
+        <div
+          className={isPending ? "pointer-events-none opacity-50" : undefined}
         >
-          <TabsList className="bg-card h-8">
-            <TabsTrigger value="INCOME" className="text-xs px-3">
-              Receitas
-            </TabsTrigger>
-            <TabsTrigger value="EXPENSE" className="text-xs px-3">
-              Despesas
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+          <Tabs value={type} onValueChange={(v) => updateParam("type", v)}>
+            <TabsList className="bg-card h-8">
+              <TabsTrigger value="INCOME" className="text-xs px-3">
+                Receitas
+              </TabsTrigger>
+              <TabsTrigger value="EXPENSE" className="text-xs px-3">
+                Despesas
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
@@ -228,59 +226,59 @@ export function PeriodComparisonAnalysis({
       </div>
 
       {/* Gráfico de Barras Agrupadas */}
-      <div className="w-full mt-4" style={{ height: 300, minHeight: 300 }}>
+      <div className="w-full mt-4" style={{ height: 300 }}>
         {!isMounted ? (
-          <Skeleton className="w-full h-full min-h-[300px]" />
+          <Skeleton className="w-full h-full" style={{ height: 300 }} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart
-            data={data}
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              stroke="currentColor"
-              className="text-border"
-            />
-            <XAxis
-              dataKey="period"
-              axisLine={false}
-              tickLine={false}
-              fontSize={10}
-              tick={{ fill: "currentColor" }}
-              className="text-muted-foreground font-bold"
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              fontSize={10}
-              tick={{ fill: "currentColor" }}
-              width={60}
-              tickFormatter={(v) => `R$ ${v / 1000}k`}
-              className="text-muted-foreground"
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: "currentColor", opacity: 0.05 }}
-            />
-            <Legend verticalAlign="top" height={36} />
-            <Bar
-              dataKey="initial"
-              name={`Ano Inicial (${baseYear})`}
-              fill={type === "INCOME" ? "#22c55e40" : "#ef444440"}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={30}
-            />
-            <Bar
-              dataKey="final"
-              name={`Ano Final (${targetYear})`}
-              fill={type === "INCOME" ? "#22c55e" : "#ef4444"}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={30}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+              data={data}
+              margin={{ top: 10, right: 10, left: 0, bottom: 32 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="currentColor"
+                className="text-border"
+              />
+              <XAxis
+                dataKey="period"
+                axisLine={false}
+                tickLine={false}
+                fontSize={10}
+                tick={{ fill: "currentColor" }}
+                className="text-muted-foreground font-bold"
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                fontSize={10}
+                tick={{ fill: "currentColor" }}
+                width={60}
+                tickFormatter={(v) => `R$ ${v / 1000}k`}
+                className="text-muted-foreground"
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ fill: "currentColor", opacity: 0.05 }}
+              />
+              <Legend verticalAlign="bottom" height={36} />
+              <Bar
+                dataKey="initial"
+                name={`Ano Inicial (${baseYear})`}
+                fill={type === "INCOME" ? "#22c55e40" : "#ef444440"}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={30}
+              />
+              <Bar
+                dataKey="final"
+                name={`Ano Final (${targetYear})`}
+                fill={type === "INCOME" ? "#22c55e" : "#ef4444"}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={30}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </div>
     </div>

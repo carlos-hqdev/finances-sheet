@@ -3,6 +3,74 @@
 import { parseISO } from "date-fns";
 import { prisma } from "@/shared/lib/db";
 
+export async function getUserSidebarInfo(userId: string) {
+  const now = new Date();
+  const refMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const [user, accounts, investments, monthlyTransactions] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+        displayName: true,
+        email: true,
+        image: true,
+      },
+    }),
+    prisma.bankAccount.findMany({
+      where: { userId },
+      select: { type: true, balance: true },
+    }),
+    prisma.investment.findMany({
+      where: { userId },
+      select: { type: true, balance: true, targetAmount: true },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        account: { userId },
+        referenceMonth: refMonth,
+        isPaid: true,
+        type: "EXPENSE",
+      },
+      select: { amount: true },
+    }),
+  ]);
+
+  const currentBalance = accounts
+    .filter((a) => a.type !== "SAVINGS")
+    .reduce((sum, a) => sum + a.balance.toNumber(), 0);
+
+  const reserves = accounts
+    .filter((a) => a.type === "SAVINGS")
+    .reduce((sum, a) => sum + a.balance.toNumber(), 0);
+
+  const investmentReserves = investments
+    .filter((i) => i.type === "SAVINGS")
+    .reduce((sum, i) => sum + i.balance.toNumber(), 0);
+
+  const totalReserves = reserves + investmentReserves;
+
+  const totalGoals = investments
+    .filter((i) => i.targetAmount && i.targetAmount.toNumber() > 0)
+    .reduce((sum, i) => sum + i.targetAmount!.toNumber(), 0);
+
+  const monthlyExpenses = monthlyTransactions.reduce(
+    (sum, t) => sum + t.amount.toNumber(),
+    0,
+  );
+
+  return {
+    name: user?.name || "Usuário",
+    displayName: user?.displayName,
+    email: user?.email || "",
+    image: user?.image,
+    currentBalance,
+    reserves: totalReserves,
+    totalGoals,
+    monthlyExpenses,
+  };
+}
+
 export async function getDashboardBalances(
   userId: string,
   _referenceMonth?: string,

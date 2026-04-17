@@ -1,28 +1,37 @@
 "use client";
 
 import type { User } from "@prisma/client";
-import { useSession } from "@/shared/lib/auth-client";
 import { useState } from "react";
 import Header from "./header";
 import Sidebar from "./sidebar";
 
+export interface SidebarInfo {
+  name: string;
+  displayName: string | null;
+  email: string;
+  image: string | null;
+  currentBalance: number;
+  reserves: number;
+  totalGoals: number;
+  monthlyExpenses: number;
+}
+
 interface AdminLayoutWrapperProps {
   children: React.ReactNode;
-  user?: User; 
+  user: User;
+  sidebarInfo: SidebarInfo;
 }
 
 export default function AdminLayoutWrapper({
   children,
-  user: initialUser,
+  user,
+  sidebarInfo,
 }: AdminLayoutWrapperProps) {
-  const { data: session } = useSession();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const currentUser = (session?.user as User) ?? initialUser;
-
   const toggleSidebar = () => {
-    if (window.innerWidth < 768) {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
       setIsMobileMenuOpen(!isMobileMenuOpen);
     } else {
       setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -31,7 +40,6 @@ export default function AdminLayoutWrapper({
 
   return (
     <div className="flex h-full bg-background overflow-hidden font-sans">
-      {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden glass"
@@ -40,10 +48,10 @@ export default function AdminLayoutWrapper({
       )}
 
       <Sidebar
-        user={currentUser}
         isCollapsed={isSidebarCollapsed}
         isMobileMenuOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
+        sidebarInfo={sidebarInfo}
       />
 
       <div className="flex-1 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-secondary scrollbar-track-transparent bg-background">
@@ -52,7 +60,7 @@ export default function AdminLayoutWrapper({
             <Header
               toggleSidebar={toggleSidebar}
               isSidebarCollapsed={isSidebarCollapsed}
-              user={currentUser}
+              user={user}
             />
             <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
               {children}

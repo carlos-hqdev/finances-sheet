@@ -132,62 +132,64 @@ export function YearlyComparisonChart({
         </Tabs>
       </div>
 
-      <div className="flex-1" style={{ minHeight: 250 }}>
+      <div className="flex-1" style={{ height: 280 }}>
         {!isMounted ? (
-          <Skeleton className="w-full h-full min-h-[250px]" />
+          <Skeleton className="w-full h-full" style={{ height: 280 }} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="currentColor"
-              className="text-border"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="month"
-              tick={<XAxisTick />}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={<YAxisTick />}
-              axisLine={false}
-              tickLine={false}
-              width={65}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: "currentColor", opacity: 0.05 }}
-            />
-            <Legend
-              formatter={(value) => (
-                <span className="text-muted-foreground text-xs">
-                  {value === "current"
-                    ? `Este Ano (${years.current})`
-                    : `Ano Anterior (${years.previous})`}
-                </span>
-              )}
-            />
-            <Bar
-              dataKey="previous"
-              name="previous"
-              fill={secondaryColor}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={20}
-            />
-            <Bar
-              dataKey="current"
-              name="current"
-              fill={primaryColor}
-              radius={[4, 4, 0, 0]}
-              maxBarSize={20}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 32 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="currentColor"
+                className="text-border"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="month"
+                tick={<XAxisTick />}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={<YAxisTick />}
+                axisLine={false}
+                tickLine={false}
+                width={65}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ fill: "currentColor", opacity: 0.05 }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                formatter={(value) => (
+                  <span className="text-muted-foreground text-xs">
+                    {value === "current"
+                      ? `Este Ano (${years.current})`
+                      : `Ano Anterior (${years.previous})`}
+                  </span>
+                )}
+              />
+              <Bar
+                dataKey="previous"
+                name="previous"
+                fill={secondaryColor}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={20}
+              />
+              <Bar
+                dataKey="current"
+                name="current"
+                fill={primaryColor}
+                radius={[4, 4, 0, 0]}
+                maxBarSize={20}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         )}
       </div>
     </div>
