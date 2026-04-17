@@ -4,10 +4,22 @@ trigger: always_on
 
 # Diretrizes do Projeto Finances Sheet
 
+## Context7 MCP (OBRIGATÓRIO)
+**SEMPRE** use Context7 MCP para consultar documentação antes de:
+- Usar bibliotecas/frameworks (React, Next.js, Prisma, Tailwind, etc.)
+- Resolver bugs relacionados a APIs de terceiros
+- Adicionar dependências
+- Usar componentes de UI unknown
+
+**Como usar:**
+1. Carregar skill: `context7-mcp`
+2. Resolver library ID: `context7_resolve-library-id`
+3. Consultar docs: `context7_query-docs`
+
 ## Sistema Operacional e Terminal
 1. O sistema operacional padrão é **WSL Ubuntu** (dentro do Windows 11).
-2. O terminal utilizado é o **Bash** (não PowerShell).
-3. Use comandos normais do Linux/Bash (ls, rm, grep, etc.).
+2. O terminal utilizado é o **Zsh** (não Bash/PowerShell).
+3. Use comandos normais do Linux (ls, rm, grep, etc.).
 
 ## Gerenciamento de Pacotes
 1. O gerenciador de pacotes obrigatório é o **pnpm**.
