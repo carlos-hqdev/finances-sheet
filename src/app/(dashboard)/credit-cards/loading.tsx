@@ -15,7 +15,7 @@ export default function CreditCardsLoading() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-[220px] w-full rounded-xl" />
+          <Skeleton key={i} className="h-55 w-full rounded-xl" />
         ))}
       </div>
     </>

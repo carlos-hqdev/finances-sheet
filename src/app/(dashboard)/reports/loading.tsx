@@ -14,8 +14,8 @@ export default function ReportsLoading() {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        <Skeleton className="h-[400px] w-full rounded-xl" />
-        <Skeleton className="h-[400px] w-full rounded-xl" />
+        <Skeleton className="h-100 w-full rounded-xl" />
+        <Skeleton className="h-100 w-full rounded-xl" />
       </div>
     </>
   );

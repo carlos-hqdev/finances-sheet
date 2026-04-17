@@ -146,7 +146,7 @@ export default function ProfilePage() {
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px] mb-8">
+        <TabsList className="grid w-full grid-cols-2 max-w-100 mb-8">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <UserIcon className="h-4 w-4" />
             Geral
@@ -283,7 +283,7 @@ export default function ProfilePage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-30"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -360,7 +360,7 @@ export default function ProfilePage() {
                   type="submit"
                   variant="destructive"
                   disabled={isLoading}
-                  className="min-w-[120px]"
+                  className="min-w-30"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

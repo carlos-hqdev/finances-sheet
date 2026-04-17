@@ -15,7 +15,7 @@ export default function CategoriesLoading() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-[100px] w-full rounded-xl" />
+          <Skeleton key={i} className="h-25 w-full rounded-xl" />
         ))}
       </div>
     </>

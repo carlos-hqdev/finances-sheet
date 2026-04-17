@@ -145,10 +145,7 @@ export function TransactionsTable({
                 <TableCell className="font-medium">
                   {format(tx.date, "dd/MM/yyyy", { locale: ptBR })}
                 </TableCell>
-                <TableCell
-                  className="max-w-[200px] truncate"
-                  title={tx.description}
-                >
+                <TableCell className="max-w-50 truncate" title={tx.description}>
                   {tx.description}
                 </TableCell>
                 <TableCell>
