@@ -82,7 +82,9 @@ export default async function CategoriesPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {typeCategories.map((cat) => {
-                  const IconComponent = iconMap[cat.icon || "Tag"] || Tag;
+                  const iconName =
+                    cat.icon && iconMap[cat.icon] ? cat.icon : "Tag";
+                  const IconComponent = iconMap[iconName] || Tag;
 
                   return (
                     <div

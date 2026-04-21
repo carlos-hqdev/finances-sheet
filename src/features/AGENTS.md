@@ -31,7 +31,8 @@ features/[nome]/
 - CRUD de categorias
 - Tipos: EXPENSE, INCOME, INVESTMENT, TRANSFER
 - Ícones (Lucide) e cores customizáveis
-- Seletor de ícone via Dialog
+- **Dialog** com cards clicáveis para tipo, grid inline para ícone, preview em tempo real
+- Cores preset + picker
 
 ### credit-cards
 - CRUD de cartões

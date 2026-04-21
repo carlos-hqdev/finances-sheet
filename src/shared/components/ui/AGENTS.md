@@ -43,9 +43,15 @@ Componentes para gestão de categorias com tipo, ícone e cor.
 
 | Componente | Arquivo | Descrição |
 |-----------|--------|-----------|
-| CategoryDialog | `features/categories/` | Dialog com Select (tipo), IconPicker, Input (cor) |
+| CategoryDialog | `features/categories/` | Dialog com cards clicáveis (tipo), grid inline (ícone), preview em tempo real, cores preset |
 | CategoryActions | `features/categories/` | Menu dropdown + AlertDialog excluir |
-| IconPicker | `features/categories/` | Dialog com grid de ícones Lucide |
+| IconPicker | `features/categories/` | Grid de ícones Lucide ( legacy) |
+
+### UI/UX do CategoryDialog
+- **Tipo**: Cards clicáveis com ícone e cor representativa por tipo
+- **Nome**: Input com preview em tempo real da categoria
+- **Ícone**: Grid inline expansível com todos os ícones Lucide
+- **Cor**: Cores preset + input color picker
 
 ### Ícones Disponíveis (Lucide)
 - EXPENSE: ShoppingCart, ShoppingBag, Car, Home, Utensils, Film, Gamepad2, Tv, Laptop, Smartphone...

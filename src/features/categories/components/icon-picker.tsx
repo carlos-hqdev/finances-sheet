@@ -44,7 +44,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/components/ui/dialog";
-import { Input } from "@/shared/components/ui/input";
 
 const iconMap: Record<string, React.ComponentType<any>> = {
   ArrowLeftRight,
