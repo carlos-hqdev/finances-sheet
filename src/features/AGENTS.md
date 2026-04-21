@@ -1,4 +1,4 @@
-# AGENT.md - src/features/
+# AGENTS.md - src/features/
 
 ## Context7 MCP
 **SEMPRE** use Context7 MCP para consultar documentação antes de usar bibliotecas/frameworks.

@@ -1,4 +1,4 @@
-# AGENT.md - src/shared/components/ui/
+# AGENTS.md - src/shared/components/ui/
 
 ## Context7 MCP
 **SEMPRE** use Context7 MCP para consultar documentação antes de usar componentes Radix/shadcn.

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "src/features/AGENTS.md",
+    "src/shared/lib/AGENTS.md",
+    "src/shared/components/ui/AGENTS.md",
+    "src/shared/components/layout/AGENTS.md",
+    "src/shared/lib/parsers/AGENTS.md"
+  ]
+}

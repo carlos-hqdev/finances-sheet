@@ -1,4 +1,4 @@
-# AGENT.md - Finances Sheet
+# AGENTS.md - Finances Sheet
 
 **Este é o arquivo de referência principal para IAs e agentes (como opencode) que precisam entender, manter ou expandir este projeto.**
 
@@ -405,9 +405,9 @@ useEffect(() => setMounted(true), []);
 
 ## Documentação Específica
 
-- `src/shared/lib/parsers/AGENT.md` - Parsers de extrato
-- `src/shared/components/layout/AGENT.md` - Layout components
-- `src/shared/components/ui/AGENT.md` - UI components
+- `src/shared/lib/parsers/AGENTS.md` - Parsers de extrato
+- `src/shared/components/layout/AGENTS.md` - Layout components
+- `src/shared/components/ui/AGENTS.md` - UI components
 - `docs/PROJECT_MAP.md` - Mapa completo do projeto
 - `docs/ROADMAP.md` - Roadmap futuro
 

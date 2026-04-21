@@ -1,4 +1,4 @@
-# 🤖 AGENT_PARSERS.md
+# 🤖 AGENTS_PARSERS.md
 
 Este documento serve como **memória e arquitetura de referência** para futuras IAs e agentes (ou desenvolvedores) que precisarem manter, expandir ou corrigir a funcionalidade de Importação de Extratos Bancários do projeto Finances Sheet.
 

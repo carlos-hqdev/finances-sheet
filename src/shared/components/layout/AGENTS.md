@@ -1,4 +1,4 @@
-# AGENT.md - src/shared/components/layout/
+# AGENTS.md - src/shared/components/layout/
 
 ## Context7 MCP
 **SEMPRE** use Context7 MCP para consultar documentação antes de usar componentes Radix/shadcn.

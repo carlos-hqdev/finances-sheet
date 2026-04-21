@@ -1,4 +1,4 @@
-# AGENT.md - src/shared/lib/
+# AGENTS.md - src/shared/lib/
 
 ## Context7 MCP
 **SEMPRE** use Context7 MCP para consultar documentação antes de usar bibliotecas.
@@ -27,6 +27,6 @@ const balance = account.balance.toNumber(); // OBRIGATÓRIO
 - Hooks: `useSession()`, `signIn()`, `signOut()`
 
 ## parsers/
-Ver `src/shared/lib/parsers/AGENT.md` para parsers de extrato.
+Ver `src/shared/lib/parsers/AGENTS.md` para parsers de extrato.
 - Suporta: Nubank, Bradesco, C6, Inter, MercadoPago, PicPay
 - Formatos: CSV, OFX, PDF
