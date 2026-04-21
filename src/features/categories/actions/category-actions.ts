@@ -4,12 +4,18 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/shared/lib/auth";
 import { prisma } from "@/shared/lib/db";
+import type { CreateCategoryInput, UpdateCategoryInput } from "../schemas";
 
-export async function createCategory(data: {
-  name: string;
-  color?: string;
-  userId: string;
-}) {
+const defaultIcons: Record<string, string> = {
+  EXPENSE: "ShoppingCart",
+  INCOME: "Briefcase",
+  INVESTMENT: "TrendingUp",
+  TRANSFER: "ArrowLeftRight",
+};
+
+export async function createCategory(
+  data: CreateCategoryInput & { userId: string },
+) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -17,10 +23,14 @@ export async function createCategory(data: {
 
     if (!session) throw new Error("Não autorizado");
 
+    const icon = data.icon || defaultIcons[data.type] || "Tag";
+
     await prisma.category.create({
       data: {
         name: data.name,
+        type: data.type,
         color: data.color,
+        icon,
         userId: session.user.id,
       },
     });
@@ -34,11 +44,7 @@ export async function createCategory(data: {
 
 export async function updateCategory(
   id: string,
-  data: {
-    name: string;
-    color?: string;
-    userId: string;
-  },
+  data: UpdateCategoryInput & { userId: string },
 ) {
   try {
     const session = await auth.api.getSession({
@@ -47,12 +53,15 @@ export async function updateCategory(
 
     if (!session) throw new Error("Não autorizado");
 
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.type !== undefined) updateData.type = data.type;
+    if (data.color !== undefined) updateData.color = data.color;
+    if (data.icon !== undefined) updateData.icon = data.icon;
+
     await prisma.category.update({
       where: { id, userId: session.user.id },
-      data: {
-        name: data.name,
-        color: data.color,
-      },
+      data: updateData,
     });
     revalidatePath("/categories");
     return { success: true };

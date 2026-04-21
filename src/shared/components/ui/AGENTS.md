@@ -25,15 +25,40 @@
 |-----------|----------|-----|
 | Button | - | actions, submit |
 | Card | - | containers |
-| Dialog | Radix | modais |
+| Dialog | Radix | modais, icon-picker |
 | DropdownMenu | Radix | menus |
 | Sheet | Radix | slide-out |
-| Select | Radix | selects |
+| Select | Radix | selects (tipo de categoria) |
 | Tabs | Radix | abas |
 | Table | - | listas |
 | Input | - | formulários |
 | Form | RHF + Zod | validação |
 | Toast | Sonner | notificações |
+| AlertDialog | Radix |.confirmação de exclusão |
+
+## Features Integradas
+
+### Categories
+Componentes para gestão de categorias com tipo, ícone e cor.
+
+| Componente | Arquivo | Descrição |
+|-----------|--------|-----------|
+| CategoryDialog | `features/categories/` | Dialog com Select (tipo), IconPicker, Input (cor) |
+| CategoryActions | `features/categories/` | Menu dropdown + AlertDialog excluir |
+| IconPicker | `features/categories/` | Dialog com grid de ícones Lucide |
+
+### Ícones Disponíveis (Lucide)
+- EXPENSE: ShoppingCart, ShoppingBag, Car, Home, Utensils, Film, Gamepad2, Tv, Laptop, Smartphone...
+- INCOME: Briefcase, Banknote, DollarSign, Wallet, TrendingUp...
+- INVESTMENT: LineChart, Building, Building2, PiggyBank, TrendingUp...
+- TRANSFER: ArrowLeftRight, ArrowUpRight, CreditCard, Wallet, Phone, Mail...
+
+### Schema Zod (Categories)
+```typescript
+import { categoryTypeEnum, createCategorySchema } from "@/features/categories/schemas";
+
+const typeOptions = ["EXPENSE", "INCOME", "INVESTMENT", "TRANSFER"];
+```
 
 ## Breakpoints
 - Mobile: < 640px
